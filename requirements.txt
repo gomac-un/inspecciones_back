@@ -1,0 +1,5 @@
+Django
+djangorestframework
+Pillow
+django-cors-headers
+djangorestframework-recursive
