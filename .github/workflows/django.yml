@@ -41,7 +41,7 @@ jobs:
         DB_USER: ${{ matrix.db_user }}
         DB_PASSWORD: ${{ matrix.db_password }}
       run: |
-        coverage run --source='.' manage.py test
+        coverage run --omit=*/tests/* --source='.' manage.py test
     - name: Upload coverage to Codecov
       if: matrix.db == 'postgres' && matrix.python-version == '3.9'
       uses: codecov/codecov-action@v1
