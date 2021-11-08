@@ -284,10 +284,8 @@ class RespuestaSerializer(serializers.ModelSerializer):
     fotos_reparacion = serializers.PrimaryKeyRelatedField(many=True, required=False, default=[], write_only=True,
                                                           queryset=FotoRespuesta.objects.all())
 
-    opciones_seleccionadas = serializers.PrimaryKeyRelatedField(many=True, required=False, default=[],
-                                                                queryset=OpcionDeRespuesta.objects.all())
-
-    respuestas = RecursiveField(many=True, required=False, default=[])
+    subrespuestas_cuadricula = RecursiveField(many=True, required=False, default=[])
+    subrespuestas_multiple = RecursiveField(many=True, required=False, default=[])
 
     class Meta:
         model = Respuesta
@@ -309,21 +307,22 @@ class InspeccionCompletaSerializer(serializers.ModelSerializer):
             self._crear_respuesta(respuesta_data, inspeccion=inspeccion)
         return inspeccion
 
-    def _crear_respuesta(self, respuesta_data, inspeccion=None, respuesta_cuadricula=None):
+    def _crear_respuesta(self, respuesta_data, inspeccion=None, respuesta_cuadricula=None, respuesta_multiple=None):
         fotos_base_data = respuesta_data.pop('fotos_base')
         fotos_reparacion_data = respuesta_data.pop('fotos_reparacion')
-        opciones_seleccionadas_data = respuesta_data.pop('opciones_seleccionadas')
-        subrespuestas_data = respuesta_data.pop('respuestas')
+        subrespuestas_cuadricula_data = respuesta_data.pop('subrespuestas_cuadricula')
+        subrespuestas_multiple_data = respuesta_data.pop('subrespuestas_multiple')
         respuesta = Respuesta.objects.create(inspeccion=inspeccion, respuesta_cuadricula=respuesta_cuadricula,
+                                             respuesta_multiple=respuesta_multiple,
                                              **respuesta_data)
         for foto_base_data in fotos_base_data:
             self._asociar_foto_base(respuesta, foto_base_data)
         for foto_reparacion_data in fotos_reparacion_data:
             self._asociar_foto_reparacion(respuesta, foto_reparacion_data)
-        for opcion_seleccionada_data in opciones_seleccionadas_data:
-            self._crear_opcion_seleccionada(respuesta, opcion_seleccionada_data)
-        for subrespuesta_data in subrespuestas_data:
+        for subrespuesta_data in subrespuestas_cuadricula_data:
             self._crear_respuesta(subrespuesta_data, respuesta_cuadricula=respuesta)
+        for subrespuesta_data in subrespuestas_multiple_data:
+            self._crear_respuesta(subrespuesta_data, respuesta_multiple=respuesta)
 
     def _asociar_foto_base(self, respuesta, foto):
         foto.tipo = FotoRespuesta.TiposDeFoto.base
@@ -336,9 +335,6 @@ class InspeccionCompletaSerializer(serializers.ModelSerializer):
         foto.tipo = FotoRespuesta.TiposDeFoto.reparacion
         foto.save()
         respuesta.fotos.add(foto)
-
-    def _crear_opcion_seleccionada(self, respuesta, opcion_seleccionada_data):
-        respuesta.opciones_seleccionadas.add(opcion_seleccionada_data)
 
 
 class SubirFotosSerializer2(serializers.Serializer):

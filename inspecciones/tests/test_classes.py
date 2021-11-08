@@ -150,11 +150,16 @@ class InspeccionesAuthenticatedTestCase(APITestCase):
 
     def crear_inspeccion_con_respuesta_de_seleccion_multiple(self, id_cuestionario, id_pregunta, id_opcion):
         id_respuesta = uuid.uuid4()
+        id_subrespuesta = uuid.uuid4()
         return self.crear_inspeccion(id_cuestionario, respuestas=[
             self._build_respuesta(id_pregunta, id_respuesta,
                                   tipo_de_respuesta='seleccion_multiple',
-                                  opciones_seleccionadas=[id_opcion])
-        ]), id_respuesta
+                                  subrespuestas_multiple=[
+                                      self._build_respuesta(None, id_subrespuesta,
+                                                            tipo_de_respuesta='parte_de_seleccion_multiple',
+                                                            opcion_respondida=id_opcion)
+                                  ])
+        ]), id_respuesta, id_subrespuesta
 
     def crear_inspeccion_con_respuesta_de_cuadricula(self, id_cuestionario, id_pregunta, id_opcion,
                                                      id_subpregunta):
@@ -163,7 +168,7 @@ class InspeccionesAuthenticatedTestCase(APITestCase):
         return self.crear_inspeccion(id_cuestionario, respuestas=[
             self._build_respuesta(id_pregunta, id_respuesta,
                                   tipo_de_respuesta='cuadricula',
-                                  respuestas=[
+                                  subrespuestas_cuadricula=[
                                       self._build_respuesta(id_subpregunta, id_subrespuesta,
                                                             tipo_de_respuesta='seleccion_unica',
                                                             opcion_seleccionada=id_opcion)

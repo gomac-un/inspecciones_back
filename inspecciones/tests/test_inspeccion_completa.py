@@ -73,12 +73,12 @@ class InspeccionCompletaTest(InspeccionesAuthenticatedTestCase):
         self.assertEqual(respuesta['opcion_seleccionada'], id_opcion)
         self.assertFalse(respuesta['reparado'])
 
-    def test_crear_inspeccion_para_cuestionario_con_una_pregunta_de_multiples_respuestas(self):
+    def test_crear_inspeccion_para_cuestionario_con_una_pregunta_de_seleccion_multiple(self):
         (response_cuestionario,
          id_cuestionario), id_pregunta, id_opcion = self.crear_cuestionario_con_pregunta_de_seleccion_multiple()
         self.assertEqual(response_cuestionario.status_code, status.HTTP_201_CREATED)
 
-        (response, id_inspeccion), id_respuesta = self.crear_inspeccion_con_respuesta_de_seleccion_multiple(
+        (response, id_inspeccion), id_respuesta, id_subrespuesta = self.crear_inspeccion_con_respuesta_de_seleccion_multiple(
             id_cuestionario, id_pregunta, id_opcion)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -86,14 +86,17 @@ class InspeccionCompletaTest(InspeccionesAuthenticatedTestCase):
         inspeccion = Inspeccion.objects.get()
         self.assertEqual(inspeccion.respuestas.count(), 1)
         respuesta = inspeccion.respuestas.get()
-        self.assertEqual(respuesta.opciones_seleccionadas.count(), 1)
-        opcion = respuesta.opciones_seleccionadas.get()
-        self.assertEqual(opcion, OpcionDeRespuesta.objects.get(id=id_opcion))
-        self.assertEqual(respuesta.fotos_base.count(), 1)
+        self.assertEqual(respuesta.tipo_de_respuesta, 'seleccion_multiple')
+        self.assertEqual(respuesta.subrespuestas_multiple.count(), 1)
+        subrespuesta = respuesta.subrespuestas_multiple.get()
+        self.assertEqual(subrespuesta.opcion_respondida.id, id_opcion)
 
         respuesta = self.request_inspeccion_y_obtener_respuesta(id_inspeccion, id_cuestionario)
         self.assertEqual(respuesta['id'], str(id_respuesta))
-        self.assertEqual(respuesta['opciones_seleccionadas'][0], id_opcion)
+        self.assertEqual(len(respuesta['subrespuestas_multiple']), 1)
+        subrespuesta = respuesta['subrespuestas_multiple'][0]
+        self.assertEqual(subrespuesta['id'], str(id_subrespuesta))
+        self.assertEqual(subrespuesta['opcion_respondida'], id_opcion)
 
     def test_crear_inspeccion_para_cuestionario_con_una_pregunta_numerica(self):
         (response_cuestionario,
@@ -128,13 +131,13 @@ class InspeccionCompletaTest(InspeccionesAuthenticatedTestCase):
         self.assertEqual(inspeccion.respuestas.count(), 1)
         respuesta = inspeccion.respuestas.get()
         self.assertEqual(respuesta.tipo_de_respuesta, 'cuadricula')
-        self.assertEqual(respuesta.respuestas.count(), 1)
-        subrespuesta = respuesta.respuestas.get()
+        self.assertEqual(respuesta.subrespuestas_cuadricula.count(), 1)
+        subrespuesta = respuesta.subrespuestas_cuadricula.get()
         self.assertEqual(subrespuesta.opcion_seleccionada.id, id_opcion)
 
         respuesta = self.request_inspeccion_y_obtener_respuesta(id_inspeccion, id_cuestionario)
         self.assertEqual(respuesta['id'], str(id_respuesta))
-        self.assertEqual(len(respuesta['respuestas']), 1)
-        subrespuesta = respuesta['respuestas'][0]
+        self.assertEqual(len(respuesta['subrespuestas_cuadricula']), 1)
+        subrespuesta = respuesta['subrespuestas_cuadricula'][0]
         self.assertEqual(subrespuesta['id'], str(id_subrespuesta))
         self.assertEqual(subrespuesta['opcion_seleccionada'], id_opcion)

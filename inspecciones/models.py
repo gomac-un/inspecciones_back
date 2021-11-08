@@ -228,7 +228,6 @@ class FotoRespuesta(models.Model):
 
 class Respuesta(models.Model):
     id = models.UUIDField(primary_key=True)
-    pregunta = models.ForeignKey(Pregunta, on_delete=models.CASCADE, related_name='respuestas')
     observacion = models.CharField(max_length=1500, blank=True)
     reparado = models.BooleanField()
     observacion_reparacion = models.CharField(max_length=1500, blank=True)
@@ -242,20 +241,44 @@ class Respuesta(models.Model):
     def fotos_reparacion(self):
         return self.fotos.filter(tipo=FotoRespuesta.TiposDeFoto.reparacion)
 
-    tipo_de_respuesta = models.CharField(choices=Pregunta.TiposDePregunta.choices, max_length=50)
+    class TiposDeRespuesta(models.TextChoices):
+        # tipo_de_cuadricula debe ser no null, tiene opciones_de_respuesta y preguntas
+        cuadricula = 'cuadricula'
+        # cuadricula debe ser no null, las demas tienen el bloque no null, no tiene opciones_de_respuesta
+        # (son las de la cuadricula asociada)
+        parte_de_cuadricula = 'parte_de_cuadricula'
+        # en la respuesta opcion_seleccionada debe ser no null, tiene opciones_de_respuesta
+        seleccion_unica = 'seleccion_unica'
+        # tiene opciones de respuesta
+        seleccion_multiple = 'seleccion_multiple'
+
+        parte_de_seleccion_multiple = 'parte_de_seleccion_multiple'
+        # en la respuesta valor debe ser no null, no tiene opciones_de_respuesta, tiene criticidades_numericas
+        numerica = 'numerica'
+
+    tipo_de_respuesta = models.CharField(choices=TiposDeRespuesta.choices, max_length=50)
+
+    # solo puede ser null cuando es parte de seleccion multiple
+    pregunta = models.ForeignKey(Pregunta, null=True, on_delete=models.CASCADE, related_name='respuestas')
 
     # una y solo una de las siguientes dos debe ser no null
     # no null para las respuestas hijas de una respuesta de tipo cuadricula
-    respuesta_cuadricula = models.ForeignKey('self', null=True, on_delete=models.CASCADE, related_name='respuestas')
+    respuesta_cuadricula = models.ForeignKey('self', null=True, on_delete=models.CASCADE, related_name='subrespuestas_cuadricula')
 
+    # no null para las respuestas hijas de una respuesta de tipo seleccion multiple
+    respuesta_multiple = models.ForeignKey('self', null=True, on_delete=models.CASCADE, related_name='subrespuestas_multiple')
+
+    # las respuestas que no son hijas de otras (cuadricula, seleccion unica, seleccion multiple y numerica) deben tener
+    # inspeccion no null
     inspeccion = models.ForeignKey(Inspeccion, null=True, on_delete=models.CASCADE, related_name='respuestas')
 
     # no null para las respuestas tipo seleccion unica
     opcion_seleccionada = models.ForeignKey(OpcionDeRespuesta, null=True, on_delete=models.DO_NOTHING,
-                                            related_name='respuestas_pregunta_de_unica_respuesta')
-    # no null para las respuestas tipo seleccion multiple
-    opciones_seleccionadas = models.ManyToManyField(OpcionDeRespuesta,
-                                                    related_name='respuestas_pregunta_de_multiples_respuestas')
+                                            related_name='respuestas_pregunta_de_seleccion_unica')
+
+    # no null para las respuestas tipo parte de seleccion multiple
+    opcion_respondida = models.ForeignKey(OpcionDeRespuesta, null=True, on_delete=models.DO_NOTHING,
+                                          related_name='respuestas_pregunta_de_seleccion_multiple')
 
     # no null para las respuestas tipo numerica
     valor_numerico = models.FloatField(null=True)
@@ -263,10 +286,8 @@ class Respuesta(models.Model):
     class Meta:
         constraints = [
             # las contraints que referencian a otras tablas no se pueden aplicar aqui
-            models.CheckConstraint(check=different(Q(respuesta_cuadricula__isnull=False), Q(inspeccion__isnull=False)),
-                                   name='%(app_label)s_%(class)s_padre'),
+            # TODO: crear los constraints descritos en los comentarios
             models.CheckConstraint(check=if_and_only_if(Q(tipo_de_respuesta='seleccion_unica'),
                                                         Q(opcion_seleccionada__isnull=False)),
                                    name='%(app_label)s_%(class)s_unica_respuesta'),
         ]
-
