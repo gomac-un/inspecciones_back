@@ -242,18 +242,10 @@ class Respuesta(models.Model):
         return self.fotos.filter(tipo=FotoRespuesta.TiposDeFoto.reparacion)
 
     class TiposDeRespuesta(models.TextChoices):
-        # tipo_de_cuadricula debe ser no null, tiene opciones_de_respuesta y preguntas
         cuadricula = 'cuadricula'
-        # cuadricula debe ser no null, las demas tienen el bloque no null, no tiene opciones_de_respuesta
-        # (son las de la cuadricula asociada)
-        parte_de_cuadricula = 'parte_de_cuadricula'
-        # en la respuesta opcion_seleccionada debe ser no null, tiene opciones_de_respuesta
         seleccion_unica = 'seleccion_unica'
-        # tiene opciones de respuesta
         seleccion_multiple = 'seleccion_multiple'
-
         parte_de_seleccion_multiple = 'parte_de_seleccion_multiple'
-        # en la respuesta valor debe ser no null, no tiene opciones_de_respuesta, tiene criticidades_numericas
         numerica = 'numerica'
 
     tipo_de_respuesta = models.CharField(choices=TiposDeRespuesta.choices, max_length=50)
