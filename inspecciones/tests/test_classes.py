@@ -127,6 +127,9 @@ class InspeccionesAuthenticatedTestCase(APITestCase):
                 'fotos_base': [self.foto_inspeccion1.id],
                 'fotos_reparacion': [self.foto_inspeccion2.id],
                 'reparado': False,
+                'observacion': 'observacion',
+                'observacion_reparacion': 'observacion reparacion',
+                'momento_respuesta': '2020-01-01T00:00:00Z',
                 **kwargs}
 
     def crear_inspeccion_con_respuesta_de_seleccion_unica(self, id_cuestionario, id_pregunta, id_opcion):
@@ -142,7 +145,7 @@ class InspeccionesAuthenticatedTestCase(APITestCase):
         return self.crear_inspeccion(id_cuestionario, respuestas=[
             self._build_respuesta(id_pregunta, id_respuesta,
                                   tipo_de_respuesta='numerica',
-                                  valor=5)
+                                  valor_numerico=5)
         ]), id_respuesta
 
     def crear_inspeccion_con_respuesta_de_seleccion_multiple(self, id_cuestionario, id_pregunta, id_opcion):

@@ -53,6 +53,10 @@ class InspeccionCompletaTest(InspeccionesAuthenticatedTestCase):
         self.assertEqual(inspeccion.respuestas.count(), 1)
         respuesta = inspeccion.respuestas.get()
         self.assertEqual(respuesta.opcion_seleccionada, OpcionDeRespuesta.objects.get(id=id_opcion))
+        self.assertEqual(respuesta.reparado, False)
+        self.assertEqual(respuesta.observacion, 'observacion')
+        self.assertEqual(respuesta.observacion_reparacion, 'observacion reparacion')
+        self.assertEqual(respuesta.momento_respuesta.isoformat(), '2020-01-01T00:00:00+00:00')
         self.assertEqual(respuesta.fotos_base.count(), 1)
         self.assertEqual(respuesta.fotos_reparacion.count(), 1)
         foto1 = respuesta.fotos_base.get()
@@ -104,11 +108,11 @@ class InspeccionCompletaTest(InspeccionesAuthenticatedTestCase):
         inspeccion = Inspeccion.objects.get()
         self.assertEqual(inspeccion.respuestas.count(), 1)
         respuesta = inspeccion.respuestas.get()
-        self.assertEqual(respuesta.valor, 5)
+        self.assertEqual(respuesta.valor_numerico, 5)
 
         respuesta = self.request_inspeccion_y_obtener_respuesta(id_inspeccion, id_cuestionario)
         self.assertEqual(respuesta['id'], str(id_respuesta))
-        self.assertEqual(respuesta['valor'], 5)
+        self.assertEqual(respuesta['valor_numerico'], 5)
 
     def test_crear_inspeccion_para_cuestionario_con_una_pregunta_de_cuadricula(self):
         (response_cuestionario,

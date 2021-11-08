@@ -65,8 +65,10 @@ class ListaUsuariosTest(InspeccionesAuthenticatedTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
         self.assertEqual(response.data,
-                         [{'id': 1, 'nombre': 'admin', 'foto': 'http://testserver/media/blank.jpg', 'rol': 'administrador'},
-                          {'id': 2, 'nombre': 'testuser1', 'foto': 'http://testserver/media/blank.jpg', 'rol': 'inspector'}])
+                         [{'id': 1, 'nombre': 'admin', 'foto': 'http://testserver/media/blank.jpg',
+                           'rol': 'administrador'},
+                          {'id': 2, 'nombre': 'testuser1', 'foto': 'http://testserver/media/blank.jpg',
+                           'rol': 'inspector'}])
 
 
 class RetrieveUsuarioTest(InspeccionesAuthenticatedTestCase):
@@ -141,6 +143,32 @@ class ActivoTest(InspeccionesAuthenticatedTestCase):
         self.assertEqual(activo.etiquetas.first().clave, 'modelo')
         self.assertEqual(activo.etiquetas.first().valor, 'carro')
 
+    def test_actualizar_activo(self):
+        activo_id = 'fas564'
+        url = reverse('activo-detail', kwargs={'pk': activo_id})
+
+        response1 = self.client.put(url, {'id': activo_id, 'etiquetas': [{'clave': 'modelo', 'valor': 'carro'},
+                                                                         {'clave': 'marca', 'valor': 'ford'}]},
+                                    format='json')
+
+        self.assertEqual(response1.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Activo.objects.count(), 2)  # el que crea la clase padre para otras pruebas, y el nuevo
+        activo = Activo.objects.get(id=activo_id)
+        self.assertEqual(activo.organizacion.nombre, 'testorg')
+        self.assertEqual(activo.etiquetas.count(), 2)
+        self.assertEqual(activo.etiquetas.first().clave, 'modelo')
+        self.assertEqual(activo.etiquetas.first().valor, 'carro')
+
+        response2 = self.client.put(url, {'id': activo_id, 'etiquetas': [{'clave': 'marca', 'valor': 'kenworth'}]},
+                                    format='json')
+        self.assertEqual(response1.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Activo.objects.count(), 2)
+        activo = Activo.objects.get(id=activo_id)
+        self.assertEqual(activo.organizacion.nombre, 'testorg')
+        self.assertEqual(activo.etiquetas.count(), 1)
+        self.assertEqual(activo.etiquetas.first().clave, 'marca')
+        self.assertEqual(activo.etiquetas.first().valor, 'kenworth')
+
     def test_crear_activo_con_etiqueta_existente(self):
         activo_id = 'fas564'
         url = reverse('activo-detail', kwargs={'pk': activo_id})
@@ -166,7 +194,6 @@ class ActivoTest(InspeccionesAuthenticatedTestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-
     def test_lista_activos(self):
         etiqueta1 = EtiquetaDeActivo.objects.create(clave='modelo', valor='carro')
         etiqueta2 = EtiquetaDeActivo.objects.create(clave='year', valor='2022')
@@ -177,7 +204,7 @@ class ActivoTest(InspeccionesAuthenticatedTestCase):
         response = self.client.get(reverse('activo-list'))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)   # el que crea la clase padre para pruebas, y el nuevo
+        self.assertEqual(len(response.data), 2)  # el que crea la clase padre para pruebas, y el nuevo
 
 
 class TestActivoSerializer(django.test.TestCase):

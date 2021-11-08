@@ -202,7 +202,7 @@ class CriticidadNumerica(models.Model):
 
 
 class Inspeccion(models.Model):
-    id = models.UUIDField(primary_key=True)
+    id = models.CharField(max_length=100, primary_key=True)
     cuestionario = models.ForeignKey(Cuestionario, on_delete=models.DO_NOTHING, related_name='inspecciones')
     activo = models.ForeignKey(Activo, related_name='inspecciones', on_delete=models.DO_NOTHING)
     inspector = models.ForeignKey(Perfil, related_name='inspecciones_llenadas', null=True, on_delete=models.SET_NULL)
@@ -231,8 +231,8 @@ class Respuesta(models.Model):
     pregunta = models.ForeignKey(Pregunta, on_delete=models.CASCADE, related_name='respuestas')
     observacion = models.CharField(max_length=1500, blank=True)
     reparado = models.BooleanField()
-    observacionReparacion = models.CharField(max_length=1500, blank=True)
-    momentoRespuesta = models.DateTimeField(blank=True, null=True)
+    observacion_reparacion = models.CharField(max_length=1500, blank=True)
+    momento_respuesta = models.DateTimeField(blank=True, null=True)
 
     @property
     def fotos_base(self):
@@ -244,7 +244,7 @@ class Respuesta(models.Model):
 
     tipo_de_respuesta = models.CharField(choices=Pregunta.TiposDePregunta.choices, max_length=50)
 
-    # una de las siguientes dos debe ser no null
+    # una y solo una de las siguientes dos debe ser no null
     # no null para las respuestas hijas de una respuesta de tipo cuadricula
     respuesta_cuadricula = models.ForeignKey('self', null=True, on_delete=models.CASCADE, related_name='respuestas')
 
@@ -258,7 +258,7 @@ class Respuesta(models.Model):
                                                     related_name='respuestas_pregunta_de_multiples_respuestas')
 
     # no null para las respuestas tipo numerica
-    valor = models.FloatField(null=True)
+    valor_numerico = models.FloatField(null=True)
 
     class Meta:
         constraints = [
