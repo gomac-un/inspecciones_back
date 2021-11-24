@@ -10,6 +10,8 @@ from inspecciones import views
 
 router = routers.DefaultRouter()
 # los que declaran basename es porque sobreescriben el get_queryset, para filtrar por ejemplo
+router.register(r'etiquetas-activos', views.EtiquetaJerarquicaDeActivoViewSet, basename='etiqueta-activos')
+router.register(r'etiquetas-preguntas', views.EtiquetaJerarquicaDePreguntaViewSet, basename='etiqueta-preguntas')
 router.register(r'users', views.UserViewSet, basename='user')
 router.register(r'organizaciones', views.OrganizacionViewSet)
 router.register(r'activos', views.ActivoViewSet, basename='activo')

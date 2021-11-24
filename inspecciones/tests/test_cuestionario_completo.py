@@ -40,6 +40,22 @@ class CuestionarioCompletoTest(InspeccionesAuthenticatedTestCase):
         cuestionario = Cuestionario.objects.get()
         self.assertEqual(cuestionario.bloques.count(), 1)
 
+    def test_crear_cuestionario_con_etiquetas(self):
+        url = reverse('cuestionario-completo-list')
+        response = self.client.post(url, {'id': uuid.uuid4(), 'tipo_de_inspeccion': 'preoperacional', 'version': 1,
+                                          'periodicidad_dias': 1,
+                                          'etiquetas_aplicables': [{'clave': 'color', 'valor': 'amarillo'}],
+                                          'bloques': []},
+                                    format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Cuestionario.objects.count(), 1)
+        cuestionario = Cuestionario.objects.get()
+        self.assertEqual(cuestionario.etiquetas_aplicables.count(), 1)
+        etiqueta = cuestionario.etiquetas_aplicables.get()
+        self.assertEqual(etiqueta.clave, 'color')
+        self.assertEqual(etiqueta.valor, 'amarillo')
+
     def test_crear_cuestionario_con_bloque_y_titulo(self):
         url = reverse('cuestionario-completo-list')
         response = self.client.post(url, {'id': uuid.uuid4(), 'tipo_de_inspeccion': 'preoperacional', 'version': 1,
@@ -175,7 +191,6 @@ class CuestionarioCompletoTest(InspeccionesAuthenticatedTestCase):
                                                'valor_maximo': 10})
 
     def test_crear_cuestionario_con_cuadricula(self):
-
         (response, id_cuestionario), id_pregunta, id_opcion, id_subpregunta = \
             self.crear_cuestionario_con_pregunta_de_cuadricula()
 

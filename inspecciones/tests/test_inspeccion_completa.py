@@ -44,7 +44,7 @@ class InspeccionCompletaTest(InspeccionesAuthenticatedTestCase):
          id_cuestionario), id_pregunta, id_opcion = self.crear_cuestionario_con_pregunta_de_seleccion_unica()
         self.assertEqual(response_cuestionario.status_code, status.HTTP_201_CREATED)
 
-        (response, id_inspeccion), id_respuesta = self.crear_inspeccion_con_respuesta_de_seleccion_unica(
+        (response, id_inspeccion) = self.crear_inspeccion_con_respuesta_de_seleccion_unica(
             id_cuestionario, id_pregunta, id_opcion)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -65,7 +65,6 @@ class InspeccionCompletaTest(InspeccionesAuthenticatedTestCase):
         self.assertEqual(foto2.id, self.foto_inspeccion2.id)
 
         respuesta = self.request_inspeccion_y_obtener_respuesta(id_inspeccion, id_cuestionario)
-        self.assertEqual(respuesta['id'], str(id_respuesta))
         self.assertEqual(len(respuesta['fotos_base_url']), 1)
         self.assertTrue(respuesta['fotos_base_url'][0]['foto'].startswith('http://testserver/media/fotos_inspecciones/'))
         self.assertEqual(len(respuesta['fotos_reparacion_url']), 1)
@@ -78,7 +77,7 @@ class InspeccionCompletaTest(InspeccionesAuthenticatedTestCase):
          id_cuestionario), id_pregunta, id_opcion = self.crear_cuestionario_con_pregunta_de_seleccion_multiple()
         self.assertEqual(response_cuestionario.status_code, status.HTTP_201_CREATED)
 
-        (response, id_inspeccion), id_respuesta, id_subrespuesta = self.crear_inspeccion_con_respuesta_de_seleccion_multiple(
+        (response, id_inspeccion) = self.crear_inspeccion_con_respuesta_de_seleccion_multiple(
             id_cuestionario, id_pregunta, id_opcion)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -92,18 +91,17 @@ class InspeccionCompletaTest(InspeccionesAuthenticatedTestCase):
         self.assertEqual(subrespuesta.opcion_respondida.id, id_opcion)
 
         respuesta = self.request_inspeccion_y_obtener_respuesta(id_inspeccion, id_cuestionario)
-        self.assertEqual(respuesta['id'], str(id_respuesta))
         self.assertEqual(len(respuesta['subrespuestas_multiple']), 1)
         subrespuesta = respuesta['subrespuestas_multiple'][0]
-        self.assertEqual(subrespuesta['id'], str(id_subrespuesta))
         self.assertEqual(subrespuesta['opcion_respondida'], id_opcion)
+        self.assertTrue(subrespuesta['opcion_respondida_esta_seleccionada'])
 
     def test_crear_inspeccion_para_cuestionario_con_una_pregunta_numerica(self):
         (response_cuestionario,
          id_cuestionario), id_pregunta, id_criticidad = self.crear_cuestionario_con_pregunta_numerica()
         self.assertEqual(response_cuestionario.status_code, status.HTTP_201_CREATED)
 
-        (response, id_inspeccion), id_respuesta = self.crear_inspeccion_con_respuesta_numerica(
+        (response, id_inspeccion) = self.crear_inspeccion_con_respuesta_numerica(
             id_cuestionario, id_pregunta)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -114,7 +112,6 @@ class InspeccionCompletaTest(InspeccionesAuthenticatedTestCase):
         self.assertEqual(respuesta.valor_numerico, 5)
 
         respuesta = self.request_inspeccion_y_obtener_respuesta(id_inspeccion, id_cuestionario)
-        self.assertEqual(respuesta['id'], str(id_respuesta))
         self.assertEqual(respuesta['valor_numerico'], 5)
 
     def test_crear_inspeccion_para_cuestionario_con_una_pregunta_de_cuadricula(self):
@@ -122,7 +119,7 @@ class InspeccionCompletaTest(InspeccionesAuthenticatedTestCase):
          id_cuestionario), id_pregunta, id_opcion, id_subpregunta = self.crear_cuestionario_con_pregunta_de_cuadricula()
         self.assertEqual(response_cuestionario.status_code, status.HTTP_201_CREATED)
 
-        (response, id_inspeccion), id_respuesta, id_subrespuesta = self.crear_inspeccion_con_respuesta_de_cuadricula(
+        (response, id_inspeccion) = self.crear_inspeccion_con_respuesta_de_cuadricula(
             id_cuestionario, id_pregunta, id_opcion, id_subpregunta)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -136,8 +133,6 @@ class InspeccionCompletaTest(InspeccionesAuthenticatedTestCase):
         self.assertEqual(subrespuesta.opcion_seleccionada.id, id_opcion)
 
         respuesta = self.request_inspeccion_y_obtener_respuesta(id_inspeccion, id_cuestionario)
-        self.assertEqual(respuesta['id'], str(id_respuesta))
         self.assertEqual(len(respuesta['subrespuestas_cuadricula']), 1)
         subrespuesta = respuesta['subrespuestas_cuadricula'][0]
-        self.assertEqual(subrespuesta['id'], str(id_subrespuesta))
         self.assertEqual(subrespuesta['opcion_seleccionada'], id_opcion)

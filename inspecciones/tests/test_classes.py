@@ -46,8 +46,7 @@ class InspeccionesAuthenticatedTestCase(APITestCase):
                                 format='json'), id_cuestionario
 
     def crear_cuestionario_con_bloque(self, **kwargs):
-        id_bloque = uuid.uuid4()
-        return self.crear_cuestionario(bloques=[{'id': id_bloque, 'n_orden': 1, **kwargs}])
+        return self.crear_cuestionario(bloques=[{'n_orden': 1, **kwargs}])
 
     def crear_cuestionario_con_pregunta_de_seleccion_unica(self):
         id_pregunta = uuid.uuid4()
@@ -122,8 +121,8 @@ class InspeccionesAuthenticatedTestCase(APITestCase):
                                       'respuestas': respuestas},
                                 format='json'), id_inspeccion
 
-    def _build_respuesta(self, id_pregunta, id_respuesta, **kwargs):
-        return {'id': id_respuesta, 'pregunta': id_pregunta,
+    def _build_respuesta(self, id_pregunta, **kwargs):
+        return {'pregunta': id_pregunta,
                 'fotos_base': [self.foto_inspeccion1.id],
                 'fotos_reparacion': [self.foto_inspeccion2.id],
                 'reparado': False,
@@ -133,47 +132,43 @@ class InspeccionesAuthenticatedTestCase(APITestCase):
                 **kwargs}
 
     def crear_inspeccion_con_respuesta_de_seleccion_unica(self, id_cuestionario, id_pregunta, id_opcion):
-        id_respuesta = uuid.uuid4()
         return self.crear_inspeccion(id_cuestionario, respuestas=[
-            self._build_respuesta(id_pregunta, id_respuesta,
+            self._build_respuesta(id_pregunta,
                                   tipo_de_respuesta='seleccion_unica',
                                   opcion_seleccionada=id_opcion)
-        ]), id_respuesta
+        ])
 
     def crear_inspeccion_con_respuesta_numerica(self, id_cuestionario, id_pregunta):
-        id_respuesta = uuid.uuid4()
         return self.crear_inspeccion(id_cuestionario, respuestas=[
-            self._build_respuesta(id_pregunta, id_respuesta,
+            self._build_respuesta(id_pregunta,
                                   tipo_de_respuesta='numerica',
                                   valor_numerico=5)
-        ]), id_respuesta
+        ])
 
     def crear_inspeccion_con_respuesta_de_seleccion_multiple(self, id_cuestionario, id_pregunta, id_opcion):
-        id_respuesta = uuid.uuid4()
-        id_subrespuesta = uuid.uuid4()
         return self.crear_inspeccion(id_cuestionario, respuestas=[
-            self._build_respuesta(id_pregunta, id_respuesta,
+            self._build_respuesta(id_pregunta,
                                   tipo_de_respuesta='seleccion_multiple',
                                   subrespuestas_multiple=[
-                                      self._build_respuesta(None, id_subrespuesta,
+                                      self._build_respuesta(None,
                                                             tipo_de_respuesta='parte_de_seleccion_multiple',
-                                                            opcion_respondida=id_opcion)
+                                                            opcion_respondida=id_opcion,
+                                                            opcion_respondida_esta_seleccionada=True)
                                   ])
-        ]), id_respuesta, id_subrespuesta
+        ])
 
     def crear_inspeccion_con_respuesta_de_cuadricula(self, id_cuestionario, id_pregunta, id_opcion,
                                                      id_subpregunta):
-        id_respuesta = uuid.uuid4()
-        id_subrespuesta = uuid.uuid4()
+
         return self.crear_inspeccion(id_cuestionario, respuestas=[
-            self._build_respuesta(id_pregunta, id_respuesta,
+            self._build_respuesta(id_pregunta,
                                   tipo_de_respuesta='cuadricula',
                                   subrespuestas_cuadricula=[
-                                      self._build_respuesta(id_subpregunta, id_subrespuesta,
+                                      self._build_respuesta(id_subpregunta,
                                                             tipo_de_respuesta='seleccion_unica',
                                                             opcion_seleccionada=id_opcion)
                                   ])
-        ]), id_respuesta, id_subrespuesta
+        ])
 
     def subir_foto_cuestionario(self):
         url = reverse('cuestionario-completo-subir-fotos')

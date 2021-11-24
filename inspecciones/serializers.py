@@ -9,7 +9,7 @@ from rest_framework_recursive.fields import RecursiveField
 from inspecciones.mixins import AbsoluteLinksMixin, DynamicFieldsModelSerializer
 from inspecciones.models import Perfil, Organizacion, Activo, EtiquetaDeActivo, Cuestionario, Bloque, Titulo, \
     Pregunta, EtiquetaDePregunta, OpcionDeRespuesta, CriticidadNumerica, Inspeccion, Respuesta, FotoRespuesta, \
-    FotoCuestionario
+    FotoCuestionario, EtiquetaJerarquicaDeActivo, EtiquetaJerarquicaDePregunta
 
 
 class OrganizacionSerializer(serializers.ModelSerializer):
@@ -98,6 +98,24 @@ class PerfilCreateSerializer(serializers.Serializer):
         return posible_username
 
 
+class EtiquetaJerarquicaDeActivoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EtiquetaJerarquicaDeActivo
+        fields = ['nombre', 'json']
+
+    def create(self, validated_data):
+        return EtiquetaJerarquicaDeActivo.objects.create(organizacion=self.context['request'].user.perfil.organizacion, **validated_data)
+
+
+class EtiquetaJerarquicaDePreguntaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EtiquetaJerarquicaDePregunta
+        fields = ['nombre', 'json']
+
+    def create(self, validated_data):
+        return EtiquetaJerarquicaDePregunta.objects.create(organizacion=self.context['request'].user.perfil.organizacion, **validated_data)
+
+
 class EtiquetaSerializer(serializers.ModelSerializer):
     class Meta:
         model = EtiquetaDeActivo
@@ -152,7 +170,7 @@ class CuestionarioSerializer(serializers.ModelSerializer):
         cuestionario = Cuestionario.objects.create(creador=perfil, organizacion=perfil.organizacion, **validated_data)
         for etiqueta in etiquetas_data:
             etiqueta_db, _ = EtiquetaDeActivo.objects.get_or_create(**etiqueta)
-            cuestionario.etiquetas.add(etiqueta_db)
+            cuestionario.etiquetas_aplicables.add(etiqueta_db)
         return cuestionario
 
     def update(self, instance, validated_data):
@@ -211,7 +229,7 @@ class BloqueSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Bloque
-        exclude = ['cuestionario']
+        exclude = ['cuestionario', 'id']
 
 
 class CuestionarioCompletoSerializer(CuestionarioSerializer):

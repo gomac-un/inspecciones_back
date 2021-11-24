@@ -36,12 +36,31 @@ class Perfil(models.Model):
         return f'{self.user}'
 
 
+class EtiquetaJerarquica(models.Model):
+    nombre = models.CharField(max_length=120, primary_key=True)
+    json = models.JSONField()
+
+    class Meta:
+        abstract = True
+
+
+class EtiquetaJerarquicaDeActivo(EtiquetaJerarquica):
+    organizacion = models.ForeignKey(Organizacion, related_name='etiquetas_de_activo', on_delete=models.CASCADE)
+    pass
+
+
+class EtiquetaJerarquicaDePregunta(EtiquetaJerarquica):
+    organizacion = models.ForeignKey(Organizacion, related_name='etiquetas_de_pregunta', on_delete=models.CASCADE)
+    pass
+
+
 class EtiquetaManager(models.Manager):
     def get_by_natural_key(self, clave, valor):
         return self.get(clave=clave, valor=valor)
 
 
 class Etiqueta(models.Model):
+    #organizacion = models.ForeignKey(Organizacion, related_name='etiquetas', on_delete=models.PROTECT)
     """Modelo base para crear etiquetas para una tabla, se debería analizar la posibilidad de usar relaciones genéricas
     https://docs.djangoproject.com/en/3.2/ref/contrib/contenttypes/#generic-relations """
     clave = models.CharField(max_length=20)
@@ -96,7 +115,7 @@ class Cuestionario(models.Model):
 
 
 class Bloque(models.Model):
-    id = models.UUIDField(primary_key=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     n_orden = models.IntegerField(null=True)
     cuestionario = models.ForeignKey(Cuestionario, on_delete=models.CASCADE, related_name='bloques')
 
@@ -161,7 +180,11 @@ class Pregunta(models.Model):
         seleccion_unica = 'seleccion_unica'  # todas las preguntas deben ser de tipo unica respuesta
         seleccion_multiple = 'seleccion_multiple'  # todas las preguntas deben ser de tipo multiples respuestas
 
+    # no null para preguntas tipo cuadricula
     tipo_de_cuadricula = models.CharField(choices=TiposDeCuadricula.choices, null=True, max_length=50)
+
+    # no null para las respuestas tipo numerica
+    unidades = models.CharField(max_length=20, blank=True, null=True)
 
     class Meta:
         constraints = [
@@ -227,7 +250,7 @@ class FotoRespuesta(models.Model):
 
 
 class Respuesta(models.Model):
-    id = models.UUIDField(primary_key=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     observacion = models.CharField(max_length=1500, blank=True)
     reparado = models.BooleanField()
     observacion_reparacion = models.CharField(max_length=1500, blank=True)
@@ -253,7 +276,7 @@ class Respuesta(models.Model):
     # solo puede ser null cuando es parte de seleccion multiple
     pregunta = models.ForeignKey(Pregunta, null=True, on_delete=models.CASCADE, related_name='respuestas')
 
-    # una y solo una de las siguientes dos debe ser no null
+    # una y solo una de las siguientes tres debe ser no null
     # no null para las respuestas hijas de una respuesta de tipo cuadricula
     respuesta_cuadricula = models.ForeignKey('self', null=True, on_delete=models.CASCADE, related_name='subrespuestas_cuadricula')
 
@@ -271,6 +294,9 @@ class Respuesta(models.Model):
     # no null para las respuestas tipo parte de seleccion multiple
     opcion_respondida = models.ForeignKey(OpcionDeRespuesta, null=True, on_delete=models.DO_NOTHING,
                                           related_name='respuestas_pregunta_de_seleccion_multiple')
+
+    # no null para las respuestas tipo parte de seleccion multiple
+    opcion_respondida_esta_seleccionada = models.BooleanField(null=True)
 
     # no null para las respuestas tipo numerica
     valor_numerico = models.FloatField(null=True)

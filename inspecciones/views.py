@@ -6,11 +6,13 @@ from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
 from inspecciones.mixins import PutAsCreateMixin
-from inspecciones.models import Perfil, Organizacion, Activo, Cuestionario, Inspeccion
+from inspecciones.models import Perfil, Organizacion, Activo, Cuestionario, Inspeccion, EtiquetaJerarquicaDeActivo, \
+    EtiquetaJerarquicaDePregunta
 from inspecciones.serializers import PerfilCreateSerializer, \
     OrganizacionSerializer, ActivoSerializer, CuestionarioSerializer, CuestionarioCompletoSerializer, \
     InspeccionCompletaSerializer, PerfilSerializer, SubirFotosSerializer, SubirFotosSerializer2, \
-    SubirFotosCuestionarioSerializer, SubirFotosInspeccionSerializer
+    SubirFotosCuestionarioSerializer, SubirFotosInspeccionSerializer, EtiquetaJerarquicaDeActivoSerializer, \
+    EtiquetaJerarquicaDePreguntaSerializer
 
 
 class OrganizacionViewSet(viewsets.ModelViewSet):
@@ -88,13 +90,42 @@ class UserViewSet(viewsets.ModelViewSet):
         return self.retrieve(request)
 
 
+class EtiquetaJerarquicaDeActivoViewSet(viewsets.ModelViewSet):
+    def get_queryset(self):
+        # solo muestra los activos que pertenecen a la organizacion del perfil actual
+        return EtiquetaJerarquicaDeActivo.objects.filter(organizacion=self.request.user.perfil.organizacion)
+
+    serializer_class = EtiquetaJerarquicaDeActivoSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class EtiquetaJerarquicaDePreguntaViewSet(viewsets.ModelViewSet):
+    def get_queryset(self):
+        # solo muestra los activos que pertenecen a la organizacion del perfil actual
+        return EtiquetaJerarquicaDePregunta.objects.filter(organizacion=self.request.user.perfil.organizacion)
+
+    serializer_class = EtiquetaJerarquicaDePreguntaSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
 class ActivoViewSet(PutAsCreateMixin, viewsets.ModelViewSet):
+#class ActivoViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # solo muestra los activos que pertenecen a la organizacion del perfil actual
         return Activo.objects.filter(organizacion=self.request.user.perfil.organizacion)
 
     serializer_class = ActivoSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        many = isinstance(request.data, list)
+        serializer = self.get_serializer(data=request.data, many=many)
+        serializer.is_valid(raise_exception=True)
+        if many:
+            super(viewsets.ModelViewSet, self).perform_create(serializer)
+        else:
+            self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, headers=headers)
 
 
 class CuestionarioViewSet(viewsets.ModelViewSet):

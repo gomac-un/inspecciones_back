@@ -15,7 +15,7 @@ class CuestionarioTest(InspeccionesAuthenticatedTestCase):
     def test_crear_cuestionario(self):
         id_local = uuid.uuid4()
         url = reverse('cuestionario-list')
-        response = self.client.post(url, {'id': id_local, 'tipo_de_inspeccion': 'preoperacional', 'version': 1,
+        response = self.client.post(url, {'id': id_local, 'tipo_de_inspeccion': 'preventivo', 'version': 1,
                                           'periodicidad_dias': 1, 'etiquetas_aplicables': []},
                                     format='json')
 
@@ -67,4 +67,15 @@ class CuestionarioTest(InspeccionesAuthenticatedTestCase):
         self.assertEqual(response.data, {'id': str(id_local), 'etiquetas_aplicables': [], 'creador': 1,
                                          'tipo_de_inspeccion': 'preoperacional', 'version': 1, 'periodicidad_dias': 1})
 
+    def test_lista_cuestionarios(self):
+        id_local = uuid.uuid4()
+        cuestionario = Cuestionario.objects.create(id=id_local, tipo_de_inspeccion='preoperacional', version=1,
+                                                   periodicidad_dias=1, organizacion=self.organizacion,
+                                                   creador=self.perfil)
 
+        url = reverse('cuestionario-list')
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0], {'id': str(id_local), 'etiquetas_aplicables': [], 'creador': 1,
+                                         'tipo_de_inspeccion': 'preoperacional', 'version': 1, 'periodicidad_dias': 1})
