@@ -15,7 +15,7 @@ class ConstraintsTest(InspeccionesAuthenticatedTestCase):
         bloque1 = Bloque.objects.create(id=uuid.uuid4(), n_orden=1, cuestionario=cuestionario)
         bloque2 = Bloque.objects.create(id=uuid.uuid4(), n_orden=2, cuestionario=cuestionario)
         opcion_de_respuesta = OpcionDeRespuesta.objects.create(id=uuid.uuid4(), titulo='opcion', descripcion='d',
-                                                               criticidad=1)
+                                                               criticidad=1, requiere_criticidad_del_inspector=False,)
 
         cuadricula = Pregunta.objects.create(id=uuid.uuid4(), titulo='tit', descripcion='desc', criticidad=1,
                                              tipo_de_pregunta=Pregunta.TiposDePregunta.cuadricula,

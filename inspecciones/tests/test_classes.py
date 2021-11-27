@@ -29,8 +29,8 @@ class InspeccionesAuthenticatedTestCase(APITestCase):
         super().tearDown()
 
     def _crear_admin_y_autenticar(self):
-        self.user = get_user_model().objects.create_user(username='testadmin', first_name="admin", password='12345')
-        self.organizacion = Organizacion.objects.create(nombre="testorg")
+        self.user = get_user_model().objects.create_user(username='gato', first_name="gato", password='gato')
+        self.organizacion = Organizacion.objects.create(nombre="gomac")
         self.perfil = Perfil.objects.create(user=self.user, celular="123", organizacion=self.organizacion,
                                             rol=Perfil.Roles.administrador)
         self.client.force_authenticate(user=self.user)
@@ -59,7 +59,7 @@ class InspeccionesAuthenticatedTestCase(APITestCase):
                       'tipo_de_pregunta': 'seleccion_unica',
                       'opciones_de_respuesta': [
                           {'id': id_opcion, 'titulo': 'tit',
-                           'descripcion': 'desc', 'criticidad': 1
+                           'descripcion': 'desc', 'criticidad': 1, 'requiere_criticidad_del_inspector': False,
                            }]
                       }), id_pregunta, id_opcion
 
@@ -74,7 +74,7 @@ class InspeccionesAuthenticatedTestCase(APITestCase):
                       'tipo_de_pregunta': 'seleccion_multiple',
                       'opciones_de_respuesta': [
                           {'id': id_opcion, 'titulo': 'tit',
-                           'descripcion': 'desc', 'criticidad': 1
+                           'descripcion': 'desc', 'criticidad': 1, 'requiere_criticidad_del_inspector': False,
                            }]
                       }), id_pregunta, id_opcion
 
@@ -104,7 +104,7 @@ class InspeccionesAuthenticatedTestCase(APITestCase):
                       'tipo_de_cuadricula': 'seleccion_unica',
                       'opciones_de_respuesta': [
                           {'id': id_opcion, 'titulo': 'tit',
-                           'descripcion': 'desc', 'criticidad': 1
+                           'descripcion': 'desc', 'criticidad': 1, 'requiere_criticidad_del_inspector': False,
                            }],
                       'preguntas': [
                           {'id': id_subpregunta, 'titulo': 'tit', 'descripcion': '', 'criticidad': 1,
@@ -129,6 +129,7 @@ class InspeccionesAuthenticatedTestCase(APITestCase):
                 'observacion': 'observacion',
                 'observacion_reparacion': 'observacion reparacion',
                 'momento_respuesta': '2020-01-01T00:00:00Z',
+                'criticidad_del_inspector': None,
                 **kwargs}
 
     def crear_inspeccion_con_respuesta_de_seleccion_unica(self, id_cuestionario, id_pregunta, id_opcion):

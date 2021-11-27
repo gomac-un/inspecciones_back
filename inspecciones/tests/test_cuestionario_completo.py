@@ -140,7 +140,8 @@ class CuestionarioCompletoTest(InspeccionesAuthenticatedTestCase):
         self.assertEqual(pregunta['tipo_de_pregunta'], 'seleccion_multiple')
         opcion_de_respuesta = pregunta['opciones_de_respuesta'][0]
         self.assertEqual(opcion_de_respuesta, {'id': str(id_opcion), 'titulo': 'tit',
-                                               'descripcion': 'desc', 'criticidad': 1
+                                               'descripcion': 'desc', 'criticidad': 1,
+                                               'requiere_criticidad_del_inspector': False,
                                                })
 
     def test_crear_cuestionario_con_pregunta_de_tipo_desconocido(self):

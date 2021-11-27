@@ -1,0 +1,235 @@
+{% extends 'inspecciones/base.html' %}
+{% load static %}
+{% block title %}
+    <title>Lista de Inspecciones</title>
+
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.1/css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/dataTables.bootstrap4.min.css"/>
+    <link rel="stylesheet" type="text/css"
+          href="https://cdn.datatables.net/buttons/1.6.5/css/buttons.bootstrap4.min.css"/>
+{% endblock %}
+{% block content %}
+    <div class="container">
+        <br>
+       <a class="text-right btn btn-sm btn-success" href="{% url 'descargar_inspecciones' %}"> Reporte </a>
+        <div class="card-title text-center mt-2 mb-5">
+            <div class="text title card-title"><h5>Lista de inspecciones</h5></div>
+        </div>
+
+        <div class="row row-content aling-items-center table-responsive">
+            <!-- La primera división, flota propia y flota renting -->
+            <div class="col-9 col-sm-6 col-md-12">
+
+                <ul class="nav nav-tabs justify-content-center nav-fill" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#prop-final" data-toggle="tab">Finalizadas</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="#prop-pend" data-toggle="tab">Pendientes</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- Este es el div de flota propia -->
+
+            <!-- Tabla de finalizadas de flota propia -->
+            <div class="tab-content">
+                {{ locas }}
+                <div class="tab-pane active" id="prop-final">
+                    <table class="table table-sm table-striped datatable" id="tablaPropiaFin">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th scope="col" class="text-center">Activo</th>
+                            <th scope="col" style="width: 20%" class="text-center">Tipo de inspección</th>
+                            <th scope="col" class="text-center">Fecha Fin</th>
+                            <th scope="col" style="width: 20%" class="text-center">Inspector</th>
+                            <th scope="col" class="text-center">Criticidad inicial</th>
+                            <th scope="col" class="text-center">Criticidad final<br>
+                            </th>
+
+                            <!--<th scope="col" class="text-center">OT preoperacional</th>-->
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for insp in finalizadas %}
+                            <tr class="text-center" id="{{ insp.id }}">
+                                <td>
+                                    <button type="button" class="btn btn-default text-center"
+                                            aria-label="Left Align"
+                                            onclick="expandir({{ insp.id }},'{{ insp.momentoInicio }}', '{{ insp.momentoFinalizacion }}',)">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                             fill="currentColor" class="bi bi-plus-circle"
+                                             viewBox="0 0 16 16">
+                                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                                        </svg>
+                                    </button>
+                                </td>
+                                <td class="text-center">{{ insp.activo }}</td>
+                                <td>{{ insp.cuestionario.tipo_de_inspeccion }}</td>
+                                <td>{{ insp.momento_subida|date:'d/m/Y' }}</td>
+                                <td class="text-center">{{ insp.inspector.user.get_full_name }}</td>
+                                <td class="text-center">{{ insp.criticidadTotal }}</td>
+                                <td class="text-center">{{ insp.criticidadReparacion }}</td>
+                                <!--<td class="text-center">
+                                    {% if insp.mantenimiento is not None %}
+                                        {{ insp.mantenimiento.ot }}
+                                    {% else %}
+                                        <a class="btn btn-sm btn-info"
+                                           href="{% url 'formOtPadre' insp.id %}"> Asignar OT </a>
+                                    {% endif %}
+                                </td>-->
+
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Tabla de pendientes de flota propia -->
+                <div class="tab-pane" id="prop-pend">
+                    <table class="table table-sm table-striped datatable" id="tablaPropiaPend">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th scope="col" class="text-center">Activo</th>
+                            <th scope="col" style="width: 30%" class="text-center">Tipo de inspección</th>
+                            <th scope="col" style="width: 30%" class="text-center">Inspector</th>
+                            <th scope="col" class="text-center" style="width: 10%">Criticidad inicial</th>
+                            <th scope="col" class="text-center" style="width: 10%">Criticidad final</th>
+                            <th scope="col" class="text-center">Avance</th>
+                            <th scope="col" class="text-center">Código</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for insp in pendientes %}
+                            <tr class="text-center" id="{{ insp.id }}">
+                                <td>
+                                    <button type="button" class="btn btn-default text-center"
+                                            aria-label="Left Align"
+                                            onclick="expandir({{ insp.id }},'{{ insp.momentoInicio }}', '{{ insp.momentoFinalizacion }}',)">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                             fill="currentColor" class="bi bi-plus-circle"
+                                             viewBox="0 0 16 16">
+                                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                                        </svg>
+                                    </button>
+                                </td>
+                                <td class="text-center">{{ insp.activo }}</td>
+                                <td>{{ insp.cuestionario.tipoDeInspeccion }}</td>
+                                <td class="text-center">{{ insp.inspector.get_full_name }}</td>
+                                <td class="text-center">{{ insp.criticidadTotal }}</td>
+                                <td class="text-center">{{ insp.criticidadReparacion }}</td>
+                                <td class="text-center"> {{ insp.avance }}%
+                                </td>
+                                <td class="text-center">{{ insp.id }}</td>
+
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+{% endblock %}
+{% block funciones %}
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.1/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.23/js/dataTables.bootstrap4.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.5/js/dataTables.buttons.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.5/js/buttons.bootstrap4.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.5/js/buttons.html5.min.js"></script>
+    <script>
+        function expandir(insp, momentoInicio, momentoSubida) {
+            console.log(insp)
+
+            const id = '#' + insp.toString();
+            const tr = document.getElementById(insp);
+            const row = table.row(tr);
+            console.log(row)
+            if (row.child.isShown()) {
+                row.child.hide();
+                $(id).removeClass('shown');
+            } else {
+                row.child(format(insp, momentoInicio, momentoSubida)).show();
+                $(id).addClass('shown');
+            }
+        }
+    </script>
+    <script>
+        function format(insp, momentoInicio, momentoSubida) {
+            var momentoSubida1;
+
+            if (momentoSubida == 'None') {
+                momentoSubida1 = 'No aplica';
+            } else {
+                momentoSubida1 = momentoSubida;
+            }
+            return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">' +
+                '<tr>' +
+                '<td>Momento inicio:</td>' +
+                '<td>' + momentoInicio + '</td>' +
+                '</tr>' +
+                '<tr>' +
+                '<td> Momento finalización:</td>' +
+                '<td>' + momentoSubida1 + '</td>' +
+                '</tr>' +
+                '</table>' +
+                '<a class="btn btn-sm btn-info"  href=' + "../detailView/" + insp + '>' + 'Ver inspección' + '</a>';
+        }</script>
+    <script>
+        $(document).ready(function () {
+            table = $('.datatable').DataTable({
+                paging: false,
+                language: {
+                    "lengthMenu": "Mostrar _MENU_ registros",
+                    "zeroRecords": "No se encontraron resultados",
+                    "info": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                    "infoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "infoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sSearch": "Buscar:",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    },
+                    "sProcessing": "Procesando...",
+                },
+
+                responsive: "true",
+                initComplete: function () {
+
+                    this.api().columns([1, 2, 3]).every(function () {
+                        var column = this;
+                        var busqueda = $('<input class="form-control float-right"style="width: 100%; height: 30px" type="text" placeholder="Buscar" />').appendTo($(column.header())).on('keyup change clear', function () {
+                            if (column.search() !== this.value) {
+                                column
+                                    .search(this.value)
+                                    .draw();
+                            }
+                        });
+                        $(busqueda).click(function (e) {
+                            e.stopPropagation();
+                        });
+
+
+                    });
+                },
+            });
+
+        });
+
+    </script>
+{% endblock %}

@@ -37,7 +37,7 @@ class Perfil(models.Model):
 
 
 class EtiquetaJerarquica(models.Model):
-    nombre = models.CharField(max_length=120, primary_key=True)
+    nombre = models.CharField(max_length=200, primary_key=True)
     json = models.JSONField()
 
     class Meta:
@@ -63,8 +63,8 @@ class Etiqueta(models.Model):
     #organizacion = models.ForeignKey(Organizacion, related_name='etiquetas', on_delete=models.PROTECT)
     """Modelo base para crear etiquetas para una tabla, se debería analizar la posibilidad de usar relaciones genéricas
     https://docs.djangoproject.com/en/3.2/ref/contrib/contenttypes/#generic-relations """
-    clave = models.CharField(max_length=20)
-    valor = models.CharField(max_length=20)
+    clave = models.CharField(max_length=200)
+    valor = models.CharField(max_length=200)
 
     objects = EtiquetaManager()
 
@@ -207,6 +207,7 @@ class OpcionDeRespuesta(models.Model):
     titulo = models.CharField(max_length=100)
     descripcion = models.CharField(max_length=1500, blank=True)
     criticidad = models.IntegerField()
+    requiere_criticidad_del_inspector = models.BooleanField()
     pregunta = models.ForeignKey(Pregunta, null=True, on_delete=models.CASCADE, related_name='opciones_de_respuesta')
 
     def __str__(self):
@@ -272,6 +273,8 @@ class Respuesta(models.Model):
         numerica = 'numerica'
 
     tipo_de_respuesta = models.CharField(choices=TiposDeRespuesta.choices, max_length=50)
+
+    criticidad_del_inspector = models.IntegerField(null=True, blank=True)
 
     # solo puede ser null cuando es parte de seleccion multiple
     pregunta = models.ForeignKey(Pregunta, null=True, on_delete=models.CASCADE, related_name='respuestas')

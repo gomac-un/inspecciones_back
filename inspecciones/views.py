@@ -1,3 +1,5 @@
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
@@ -164,3 +166,9 @@ class InspeccionCompletaViewSet(viewsets.ModelViewSet):
         res = serializer.save()
         return Response(res, status=status.HTTP_201_CREATED)
 
+
+@login_required(login_url="login")
+def lista_inspecciones(request):
+    inspecciones = Inspeccion.objects.all().order_by('-momento_subida')
+    context = {'finalizadas': inspecciones}
+    return render(request, 'inspecciones/list_inspecciones.html', context)
