@@ -65,7 +65,7 @@ class ListaUsuariosTest(InspeccionesAuthenticatedTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
         self.assertEqual(response.data,
-                         [{'id': 1, 'nombre': 'admin', 'foto': 'http://testserver/media/blank.jpg',
+                         [{'id': 1, 'nombre': 'gato', 'foto': 'http://testserver/media/blank.jpg',
                            'rol': 'administrador'},
                           {'id': 2, 'nombre': 'testuser1', 'foto': 'http://testserver/media/blank.jpg',
                            'rol': 'inspector'}])
@@ -84,15 +84,15 @@ class RetrieveUsuarioTest(InspeccionesAuthenticatedTestCase):
         self.assertEqual(response.data,
                          {'id': 2, 'esta_activo': True, 'username': 'testuser1', 'nombre': 'testuser1',
                           'email': 'tu@gmail.com', 'foto': 'http://testserver/media/blank.jpg', 'celular': '123',
-                          'organizacion': 'testorg', 'rol': 'inspector'})
+                          'organizacion': 'gomac', 'rol': 'inspector'})
 
     def test_mi_perfil(self):
         response = self.client.get(reverse('user-mi-perfil'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response.data.pop('fecha_registro')
         self.assertEqual(response.data,
-                         {'id': 1, 'esta_activo': True, 'username': 'testadmin', 'nombre': 'admin', 'email': '',
-                          'foto': 'http://testserver/media/blank.jpg', 'celular': '123', 'organizacion': 'testorg',
+                         {'id': 1, 'esta_activo': True, 'username': 'gato', 'nombre': 'gato', 'email': '',
+                          'foto': 'http://testserver/media/blank.jpg', 'celular': '123', 'organizacion': 'gomac',
                           'rol': 'administrador'})
 
     def test_la_url_de_la_foto_debe_ser_absoluta_y_generada(self):
@@ -118,14 +118,14 @@ class CrearOrganizacionTest(InspeccionesAuthenticatedTestCase):
     def test_crear_organizacion(self):
         url = reverse('organizacion-list')
         with open('media/perfil.png', 'rb') as foto:
-            response = self.client.post(url, {'nombre': 'gomac', 'logo': foto, 'link': 'https://gomac.com',
+            response = self.client.post(url, {'nombre': 'gomac2', 'logo': foto, 'link': 'https://gomac.com',
                                               'acerca': 'gomac'})
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Organizacion.objects.count(), 2)  # la del admin autenticado y la nueva
-        org = Organizacion.objects.get(nombre='gomac')
+        org = Organizacion.objects.get(nombre='gomac2')
         self.assertEqual(org.link, 'https://gomac.com')
-        Organizacion.objects.get(nombre='gomac').logo.delete()
+        Organizacion.objects.get(nombre='gomac2').logo.delete()
 
 
 class ActivoTest(InspeccionesAuthenticatedTestCase):
@@ -139,7 +139,7 @@ class ActivoTest(InspeccionesAuthenticatedTestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Activo.objects.count(), 2)  # el que crea la clase padre para pruebas, y el nuevo
         activo = Activo.objects.get(id=activo_id)
-        self.assertEqual(activo.organizacion.nombre, 'testorg')
+        self.assertEqual(activo.organizacion.nombre, 'gomac')
         self.assertEqual(activo.etiquetas.first().clave, 'modelo')
         self.assertEqual(activo.etiquetas.first().valor, 'carro')
 
@@ -154,7 +154,7 @@ class ActivoTest(InspeccionesAuthenticatedTestCase):
         self.assertEqual(response1.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Activo.objects.count(), 2)  # el que crea la clase padre para otras pruebas, y el nuevo
         activo = Activo.objects.get(id=activo_id)
-        self.assertEqual(activo.organizacion.nombre, 'testorg')
+        self.assertEqual(activo.organizacion.nombre, 'gomac')
         self.assertEqual(activo.etiquetas.count(), 2)
         self.assertEqual(activo.etiquetas.first().clave, 'modelo')
         self.assertEqual(activo.etiquetas.first().valor, 'carro')
@@ -164,7 +164,7 @@ class ActivoTest(InspeccionesAuthenticatedTestCase):
         self.assertEqual(response1.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Activo.objects.count(), 2)
         activo = Activo.objects.get(id=activo_id)
-        self.assertEqual(activo.organizacion.nombre, 'testorg')
+        self.assertEqual(activo.organizacion.nombre, 'gomac')
         self.assertEqual(activo.etiquetas.count(), 1)
         self.assertEqual(activo.etiquetas.first().clave, 'marca')
         self.assertEqual(activo.etiquetas.first().valor, 'kenworth')
