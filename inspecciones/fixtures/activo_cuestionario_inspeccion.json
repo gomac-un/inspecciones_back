@@ -141,7 +141,7 @@
         "fields": {
             "titulo": "pregunta1",
             "descripcion": "",
-            "criticidad": 0,
+            "criticidad": 2,
             "bloque": "44fbd5b7-3e0b-4923-98c7-4a702705e761",
             "cuadricula": null,
             "tipo_de_pregunta": "seleccion_unica",
@@ -155,11 +155,22 @@
     },
     {
         "model": "inspecciones.opcionderespuesta",
+        "pk": "719d3b81-c420-412b-a213-78efdd1da349",
+        "fields": {
+            "titulo": "respuesta3",
+            "descripcion": "",
+            "criticidad": 0,
+            "requiere_criticidad_del_inspector": false,
+            "pregunta": "a9e33b36-dae2-4079-8b48-8e35b5f2620a"
+        }
+    },
+    {
+        "model": "inspecciones.opcionderespuesta",
         "pk": "719d3b81-c420-412b-a213-78efdd1da348",
         "fields": {
             "titulo": "respuesta2",
             "descripcion": "",
-            "criticidad": 0,
+            "criticidad": 2,
             "requiere_criticidad_del_inspector": true,
             "pregunta": "a9e33b36-dae2-4079-8b48-8e35b5f2620a"
         }
@@ -183,7 +194,11 @@
             "activo": "123",
             "inspector": 1,
             "momento_inicio": "2021-11-26T00:51:55Z",
-            "momento_subida": "2021-11-26T00:53:04.811Z"
+            "momento_finalizacion": "2021-11-26T00:52:55Z",
+            "momento_subida": "2021-11-26T00:53:04.811Z",
+            "estado": "finalizada",
+            "criticidad_calculada": 1,
+            "criticidad_calculada_con_reparaciones": 0,
         }
     },
     {
@@ -191,11 +206,13 @@
         "pk": "d5fc53b0-b9ec-46e7-b508-bf37a9f281c7",
         "fields": {
             "observacion": "",
-            "reparado": false,
+            "reparado": true,
             "observacion_reparacion": "",
             "momento_respuesta": "2021-11-26T00:52:23Z",
             "tipo_de_respuesta": "seleccion_unica",
             "criticidad_del_inspector": null,
+            "criticidad_calculada": 1,
+            "criticidad_calculada_con_reparaciones": 0,
             "pregunta": "a9e33b36-dae2-4079-8b48-8e35b5f2620a",
             "respuesta_cuadricula": null,
             "respuesta_multiple": null,

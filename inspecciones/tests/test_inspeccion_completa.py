@@ -33,6 +33,8 @@ class InspeccionCompletaTest(InspeccionesAuthenticatedTestCase):
         id_inspeccion = uuid.uuid4()
         response = self.client.post(url, {'id': id_inspeccion, 'cuestionario': id_cuestionario,
                                           'momento_inicio': '2020-01-01T00:00:00Z', 'activo': self.activo.id,
+                                          'estado': 'borrador', 'criticidad_calculada': 0,
+                                          'criticidad_calculada_con_reparaciones': 0,
                                           },
                                     format='json')
 

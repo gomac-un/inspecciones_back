@@ -232,7 +232,18 @@ class Inspeccion(models.Model):
     inspector = models.ForeignKey(Perfil, related_name='inspecciones_llenadas', null=True, on_delete=models.SET_NULL)
 
     momento_inicio = models.DateTimeField()
+    momento_finalizacion = models.DateTimeField(null=True)
     momento_subida = models.DateTimeField(auto_now_add=True)
+
+    class EstadoDeInspeccion(models.TextChoices):
+        borrador = 'borrador'
+        en_reparacion = 'en_reparacion'
+        finalizada = 'finalizada'
+
+    estado = models.CharField(choices=EstadoDeInspeccion.choices, max_length=50)
+
+    criticidad_calculada = models.IntegerField()
+    criticidad_calculada_con_reparaciones = models.IntegerField()
 
 
 class FotoRespuesta(models.Model):
@@ -274,7 +285,12 @@ class Respuesta(models.Model):
 
     tipo_de_respuesta = models.CharField(choices=TiposDeRespuesta.choices, max_length=50)
 
+    # No null solo si la opcion seleccionada u opcion respondida requiereCriticidadDelInspector
     criticidad_del_inspector = models.IntegerField(null=True, blank=True)
+
+    # caches del calculo de las criticidades
+    criticidad_calculada = models.IntegerField()
+    criticidad_calculada_con_reparaciones = models.IntegerField()
 
     # solo puede ser null cuando es parte de seleccion multiple
     pregunta = models.ForeignKey(Pregunta, null=True, on_delete=models.CASCADE, related_name='respuestas')

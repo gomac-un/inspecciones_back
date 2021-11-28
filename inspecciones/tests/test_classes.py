@@ -118,6 +118,8 @@ class InspeccionesAuthenticatedTestCase(APITestCase):
 
         return self.client.post(url, {'id': id_inspeccion, 'cuestionario': id_cuestionario,
                                       'momento_inicio': '2020-01-01T00:00:00Z', 'activo': self.activo.id,
+                                      'criticidad_calculada': 0, 'criticidad_calculada_con_reparaciones': 0,
+                                      'estado': 'borrador',
                                       'respuestas': respuestas},
                                 format='json'), id_inspeccion
 
@@ -130,6 +132,8 @@ class InspeccionesAuthenticatedTestCase(APITestCase):
                 'observacion_reparacion': 'observacion reparacion',
                 'momento_respuesta': '2020-01-01T00:00:00Z',
                 'criticidad_del_inspector': None,
+                'criticidad_calculada': 0,
+                'criticidad_calculada_con_reparaciones': 0,
                 **kwargs}
 
     def crear_inspeccion_con_respuesta_de_seleccion_unica(self, id_cuestionario, id_pregunta, id_opcion):
