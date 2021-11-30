@@ -12,7 +12,7 @@ from .test_classes import InspeccionesAuthenticatedTestCase
 class RegistroUsuarioTest(APITestCase):
     def setUp(self):
         Organizacion.objects.create(nombre='laga_inc')
-        self.url = reverse('user-list')
+        self.url = reverse('api:user-list')
 
         self.registro_form = {'username': 'gato', 'nombre': 'juan daniel', 'apellido': 'perez',
                               'email': 'jp@gmail.com', 'password': '123', 'celular': '123',
@@ -61,7 +61,7 @@ class ListaUsuariosTest(InspeccionesAuthenticatedTestCase):
         user2 = get_user_model().objects.create_user(username='testuser2', first_name="testuser2", password='12345')
         Perfil.objects.create(user=user2, celular="123", organizacion=otra_org, rol=Perfil.Roles.inspector)
 
-        response = self.client.get(reverse('user-list'))
+        response = self.client.get(reverse('api:user-list'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
         self.assertEqual(response.data,
@@ -78,7 +78,7 @@ class RetrieveUsuarioTest(InspeccionesAuthenticatedTestCase):
         perfil1 = Perfil.objects.create(user=user1, celular="123", organizacion=self.organizacion,
                                         rol=Perfil.Roles.inspector)
 
-        response = self.client.get(reverse('user-detail', args=[perfil1.pk]))
+        response = self.client.get(reverse('api:user-detail', args=[perfil1.pk]))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response.data.pop('fecha_registro')
         self.assertEqual(response.data,
@@ -87,7 +87,7 @@ class RetrieveUsuarioTest(InspeccionesAuthenticatedTestCase):
                           'organizacion': 'gomac', 'rol': 'inspector'})
 
     def test_mi_perfil(self):
-        response = self.client.get(reverse('user-mi-perfil'))
+        response = self.client.get(reverse('api:user-mi-perfil'))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response.data.pop('fecha_registro')
         self.assertEqual(response.data,
@@ -96,7 +96,7 @@ class RetrieveUsuarioTest(InspeccionesAuthenticatedTestCase):
                           'rol': 'administrador'})
 
     def test_la_url_de_la_foto_debe_ser_absoluta_y_generada(self):
-        response = self.client.get(reverse('user-mi-perfil'), SERVER_NAME="anotherdomain.com")
+        response = self.client.get(reverse('api:user-mi-perfil'), SERVER_NAME="anotherdomain.com")
         self.assertEqual(response.data['foto'], 'http://anotherdomain.com/media/blank.jpg')
 
 
@@ -107,7 +107,7 @@ class DestroyUsuarioTest(InspeccionesAuthenticatedTestCase):
         perfil1 = Perfil.objects.create(user=user1, celular="123", organizacion=self.organizacion,
                                         rol=Perfil.Roles.inspector)
 
-        response = self.client.delete(reverse('user-detail', args=[perfil1.pk]))
+        response = self.client.delete(reverse('api:user-detail', args=[perfil1.pk]))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
         self.assertEqual(Perfil.objects.filter(user=user1).count(), 0)
@@ -116,7 +116,7 @@ class DestroyUsuarioTest(InspeccionesAuthenticatedTestCase):
 
 class CrearOrganizacionTest(InspeccionesAuthenticatedTestCase):
     def test_crear_organizacion(self):
-        url = reverse('organizacion-list')
+        url = reverse('api:organizacion-list')
         with open('media/perfil.png', 'rb') as foto:
             response = self.client.post(url, {'nombre': 'gomac2', 'logo': foto, 'link': 'https://gomac.com',
                                               'acerca': 'gomac'})
@@ -131,7 +131,7 @@ class CrearOrganizacionTest(InspeccionesAuthenticatedTestCase):
 class ActivoTest(InspeccionesAuthenticatedTestCase):
     def test_crear_activo(self):
         activo_id = 'fas564'
-        url = reverse('activo-detail', kwargs={'pk': activo_id})
+        url = reverse('api:activo-detail', kwargs={'pk': activo_id})
 
         response = self.client.put(url, {'id': activo_id, 'etiquetas': [{'clave': 'modelo', 'valor': 'carro'}]},
                                    format='json')
@@ -145,7 +145,7 @@ class ActivoTest(InspeccionesAuthenticatedTestCase):
 
     def test_actualizar_activo(self):
         activo_id = 'fas564'
-        url = reverse('activo-detail', kwargs={'pk': activo_id})
+        url = reverse('api:activo-detail', kwargs={'pk': activo_id})
 
         response1 = self.client.put(url, {'id': activo_id, 'etiquetas': [{'clave': 'modelo', 'valor': 'carro'},
                                                                          {'clave': 'marca', 'valor': 'ford'}]},
@@ -171,7 +171,7 @@ class ActivoTest(InspeccionesAuthenticatedTestCase):
 
     def test_crear_activo_con_etiqueta_existente(self):
         activo_id = 'fas564'
-        url = reverse('activo-detail', kwargs={'pk': activo_id})
+        url = reverse('api:activo-detail', kwargs={'pk': activo_id})
 
         EtiquetaDeActivo.objects.create(clave='modelo', valor='carro')
 
@@ -187,7 +187,7 @@ class ActivoTest(InspeccionesAuthenticatedTestCase):
 
     def test_crear_activo_sin_etiqueta(self):
         activo_id = 'fas564'
-        url = reverse('activo-detail', kwargs={'pk': activo_id})
+        url = reverse('api:activo-detail', kwargs={'pk': activo_id})
 
         response = self.client.put(url, {'id': activo_id, 'etiquetas': []},
                                    format='json')
@@ -201,7 +201,7 @@ class ActivoTest(InspeccionesAuthenticatedTestCase):
         Activo.objects.create(id="fas564", organizacion=self.perfil.organizacion).etiquetas.set([etiqueta1, etiqueta2])
         Activo.objects.create(id="fas563", organizacion=otra_org).etiquetas.set([etiqueta1])
 
-        response = self.client.get(reverse('activo-list'))
+        response = self.client.get(reverse('api:activo-list'))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)  # el que crea la clase padre para pruebas, y el nuevo

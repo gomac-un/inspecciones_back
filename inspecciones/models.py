@@ -7,6 +7,8 @@ from django.db import models
 from django.db.models import Q
 from django.urls import reverse
 
+from multiselectfield import MultiSelectField
+
 from inspecciones.q_logic import different, if_and_only_if
 
 
@@ -16,11 +18,25 @@ class Organizacion(models.Model):
     link = models.URLField(blank=True)
     acerca = models.TextField(blank=True)
 
+    class Caracteristicas(models.TextChoices):
+        reparaciones = "reparaciones"
+        planeacion = "planeacion"
+
+    caracteristicas = MultiSelectField(choices=Caracteristicas.choices, blank=True)
+
     def __str__(self):
         return self.nombre
 
     def get_absolute_url(self):
         return reverse('organizacion-detail', kwargs={'pk': self.pk})
+
+"""
+class Caracteristica(models.Model):
+    nombre = models.CharField(max_length=120, blank=False)
+    descripcion = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.nombre"""
 
 
 class Perfil(models.Model):

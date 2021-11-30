@@ -22,8 +22,9 @@
     {% if request.resolver_match.url_name != 'login' %}{% include "menu.html" %}{% endif %}
 
     {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
-
-    {% block content %}{% endblock %}
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
 
 {% endblock %}
 

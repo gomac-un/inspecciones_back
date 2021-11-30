@@ -20,15 +20,21 @@ class OrganizacionListView(ListView):
 class OrganizacionDetailView(DetailView):
     model = Organizacion
 
+    def get_context_data(self, **kwargs):
+        """Agrega todas las caracteristicas."""
+        context = {'caracteristicas': Organizacion.Caracteristicas.values}
+        context.update(kwargs)
+        return super().get_context_data(**context)
+
 
 class OrganizacionCreateView(CreateView):
     model = Organizacion
-    fields = ['nombre', 'logo', 'link', 'acerca']
+    fields = ['nombre', 'logo', 'link', 'acerca', 'caracteristicas']
 
 
 class OrganizacionUpdateView(UpdateView):
     model = Organizacion
-    fields = ['nombre', 'logo', 'link', 'acerca']
+    fields = ['nombre', 'logo', 'link', 'acerca', 'caracteristicas']
 
 
 class OrganizacionDeleteView(DeleteView):

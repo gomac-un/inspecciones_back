@@ -21,8 +21,9 @@ router.register(r'inspecciones-completas', views_api.InspeccionCompletaViewSet, 
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
+
 urlpatterns = [
-    path('', include(router.urls)),
+    path('', include((router.urls, 'api'), namespace='api')),
     path('api-auth/', include(rest_framework.urls, namespace='rest_framework')),
     path('api-token-auth/', token_views.obtain_auth_token, name='api-token-auth'),
 ]

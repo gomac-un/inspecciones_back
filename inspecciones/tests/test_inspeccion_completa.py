@@ -13,13 +13,13 @@ class InspeccionCompletaTest(InspeccionesAuthenticatedTestCase):
     # funciones auxiliares
 
     def request_inspeccion_y_obtener_respuesta(self, id_inspeccion, id_cuestionario):
-        url_obtener = reverse('inspeccion-completa-detail', args=[id_inspeccion])
+        url_obtener = reverse('api:inspeccion-completa-detail', args=[id_inspeccion])
         response = self.client.get(url_obtener)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         inspeccion = response.data
         self.assertEqual(inspeccion['id'], str(id_inspeccion))
         self.assertEqual(inspeccion['cuestionario'], id_cuestionario)
-        self.assertEqual(inspeccion['momento_inicio'], '2020-01-01T00:00:00Z')
+        self.assertIsNotNone(inspeccion['momento_inicio'])
         self.assertEqual(inspeccion['activo'], self.activo.id)
         self.assertEqual(len(inspeccion['respuestas']), 1)
         respuesta = inspeccion['respuestas'][0]
@@ -29,7 +29,7 @@ class InspeccionCompletaTest(InspeccionesAuthenticatedTestCase):
         response_cuestionario, id_cuestionario = self.crear_cuestionario(bloques=[])
         self.assertEqual(response_cuestionario.status_code, status.HTTP_201_CREATED)
 
-        url = reverse('inspeccion-completa-list')
+        url = reverse('api:inspeccion-completa-list')
         id_inspeccion = uuid.uuid4()
         response = self.client.post(url, {'id': id_inspeccion, 'cuestionario': id_cuestionario,
                                           'momento_inicio': '2020-01-01T00:00:00Z', 'activo': self.activo.id,

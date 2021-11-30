@@ -36,7 +36,7 @@ class InspeccionesAuthenticatedTestCase(APITestCase):
         self.client.force_authenticate(user=self.user)
 
     def crear_cuestionario(self, bloques=None):
-        url = reverse('cuestionario-completo-list')
+        url = reverse('api:cuestionario-completo-list')
         id_cuestionario = uuid.uuid4()
 
         return self.client.post(url, {'id': id_cuestionario, 'tipo_de_inspeccion': 'preoperacional',
@@ -113,7 +113,7 @@ class InspeccionesAuthenticatedTestCase(APITestCase):
                       }), id_pregunta, id_opcion, id_subpregunta
 
     def crear_inspeccion(self, id_cuestionario, respuestas=None):
-        url = reverse('inspeccion-completa-list')
+        url = reverse('api:inspeccion-completa-list')
         id_inspeccion = uuid.uuid4()
 
         return self.client.post(url, {'id': id_inspeccion, 'cuestionario': id_cuestionario,
@@ -176,13 +176,13 @@ class InspeccionesAuthenticatedTestCase(APITestCase):
         ])
 
     def subir_foto_cuestionario(self):
-        url = reverse('cuestionario-completo-subir-fotos')
+        url = reverse('api:cuestionario-completo-subir-fotos')
         with open('media/perfil.png', 'rb') as foto:
             response = self.client.post(url, {'fotos': [foto]})
         return response, response.data['perfil.png']
 
     def subir_foto_inspeccion(self):
-        url = reverse('inspeccion-completa-subir-fotos')
+        url = reverse('api:inspeccion-completa-subir-fotos')
         with open('media/perfil.png', 'rb') as foto:
             response = self.client.post(url, {'fotos': [foto]})
         return response, response.data['perfil.png']

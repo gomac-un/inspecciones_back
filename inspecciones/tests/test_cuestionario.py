@@ -14,7 +14,7 @@ from ..models import Cuestionario, OpcionDeRespuesta, Pregunta, Bloque
 class CuestionarioTest(InspeccionesAuthenticatedTestCase):
     def test_crear_cuestionario(self):
         id_local = uuid.uuid4()
-        url = reverse('cuestionario-list')
+        url = reverse('api:cuestionario-list')
         response = self.client.post(url, {'id': id_local, 'tipo_de_inspeccion': 'preventivo', 'version': 1,
                                           'periodicidad_dias': 1, 'etiquetas_aplicables': []},
                                     format='json')
@@ -27,7 +27,7 @@ class CuestionarioTest(InspeccionesAuthenticatedTestCase):
         self.assertEqual(cuestionario.id, id_local)
 
     def test_no_se_permite_crear_cuestionario_sin_id(self):
-        url_crear = reverse('cuestionario-list')
+        url_crear = reverse('api:cuestionario-list')
 
         response_creacion = self.client.post(url_crear, {'tipo_de_inspeccion': 'preoperacional', 'version': 1,
                                                          'periodicidad_dias': 1, 'etiquetas_aplicables': []},
@@ -36,7 +36,7 @@ class CuestionarioTest(InspeccionesAuthenticatedTestCase):
         self.assertEqual(Cuestionario.objects.count(), 0)
 
     def test_no_se_permite_cambiar_id_cuestionario(self):
-        url_crear = reverse('cuestionario-list')
+        url_crear = reverse('api:cuestionario-list')
         id_local = uuid.uuid4()
         response_creacion = self.client.post(url_crear,
                                              {'id': id_local, 'tipo_de_inspeccion': 'preoperacional', 'version': 1,
@@ -44,7 +44,7 @@ class CuestionarioTest(InspeccionesAuthenticatedTestCase):
                                              format='json')
         self.assertEqual(response_creacion.status_code, status.HTTP_201_CREATED)
 
-        url_actualizar = reverse('cuestionario-detail', kwargs={'pk': id_local})
+        url_actualizar = reverse('api:cuestionario-detail', kwargs={'pk': id_local})
         nueva_id = uuid.uuid4()
         response_actualizacion = self.client.patch(url_actualizar, {'id': nueva_id},
                                                    format='json')
@@ -60,7 +60,7 @@ class CuestionarioTest(InspeccionesAuthenticatedTestCase):
                                                    periodicidad_dias=1, organizacion=self.organizacion,
                                                    creador=self.perfil)
 
-        url_detalle = reverse('cuestionario-detail', kwargs={'pk': id_local})
+        url_detalle = reverse('api:cuestionario-detail', kwargs={'pk': id_local})
         response = self.client.get(url_detalle, {'id': url_detalle})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -73,9 +73,10 @@ class CuestionarioTest(InspeccionesAuthenticatedTestCase):
                                                    periodicidad_dias=1, organizacion=self.organizacion,
                                                    creador=self.perfil)
 
-        url = reverse('cuestionario-list')
+        url = reverse('api:cuestionario-list')
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data[0], {'id': str(id_local), 'etiquetas_aplicables': [], 'creador': 1,
-                                         'tipo_de_inspeccion': 'preoperacional', 'version': 1, 'periodicidad_dias': 1})
+                                            'tipo_de_inspeccion': 'preoperacional', 'version': 1,
+                                            'periodicidad_dias': 1})

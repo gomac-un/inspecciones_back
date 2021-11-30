@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_extensions',
     "django_bootstrap5",
+    'multiselectfield',
 ]
 
 MIDDLEWARE = [

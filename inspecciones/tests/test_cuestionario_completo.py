@@ -11,7 +11,7 @@ class CuestionarioCompletoTest(InspeccionesAuthenticatedTestCase):
     # funciones auxiliares
 
     def request_cuestionario_y_obtener_bloque(self, id_cuestionario):
-        url_obtener = reverse('cuestionario-completo-detail', args=[id_cuestionario])
+        url_obtener = reverse('api:cuestionario-completo-detail', args=[id_cuestionario])
         response = self.client.get(url_obtener)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         cuestionario = response.data
@@ -27,7 +27,7 @@ class CuestionarioCompletoTest(InspeccionesAuthenticatedTestCase):
     # inicio tests
 
     def test_crear_cuestionario_con_bloque(self):
-        url = reverse('cuestionario-completo-list')
+        url = reverse('api:cuestionario-completo-list')
         response = self.client.post(url, {'id': uuid.uuid4(), 'tipo_de_inspeccion': 'preoperacional', 'version': 1,
                                           'periodicidad_dias': 1, 'etiquetas_aplicables': [],
                                           'bloques': [
@@ -41,7 +41,7 @@ class CuestionarioCompletoTest(InspeccionesAuthenticatedTestCase):
         self.assertEqual(cuestionario.bloques.count(), 1)
 
     def test_crear_cuestionario_con_etiquetas(self):
-        url = reverse('cuestionario-completo-list')
+        url = reverse('api:cuestionario-completo-list')
         response = self.client.post(url, {'id': uuid.uuid4(), 'tipo_de_inspeccion': 'preoperacional', 'version': 1,
                                           'periodicidad_dias': 1,
                                           'etiquetas_aplicables': [{'clave': 'color', 'valor': 'amarillo'}],
@@ -57,7 +57,7 @@ class CuestionarioCompletoTest(InspeccionesAuthenticatedTestCase):
         self.assertEqual(etiqueta.valor, 'amarillo')
 
     def test_crear_cuestionario_con_bloque_y_titulo(self):
-        url = reverse('cuestionario-completo-list')
+        url = reverse('api:cuestionario-completo-list')
         response = self.client.post(url, {'id': uuid.uuid4(), 'tipo_de_inspeccion': 'preoperacional', 'version': 1,
                                           'periodicidad_dias': 1, 'etiquetas_aplicables': [],
                                           'bloques': [
@@ -159,8 +159,7 @@ class CuestionarioCompletoTest(InspeccionesAuthenticatedTestCase):
                            }]
                       })
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['bloques'][0]['pregunta']['tipo_de_pregunta'][0],
-                         '"capybara" is not a valid choice.')
+        self.assertEqual(response.data['bloques'][0]['pregunta']['tipo_de_pregunta'][0].code, 'invalid_choice')
 
         # probar que la informacion no está en la base de datos
         self.assertEqual(Cuestionario.objects.count(), 0)
