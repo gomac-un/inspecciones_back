@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ organizacion.nombre }}{% endblock %}
+{% block content %}
+    <div class="card card-gomac">
+        <h5 class="card-header">Integrantes</h5>
+        <div class="list-group list-group-flush">
+            {% for usuario in organizacion.usuarios.all %}
+                <div class="list-group-item list-group-item-action d-flex gap-3 py-3">
+                    <img src="{{ usuario.foto.url }}" alt="foto" width="32" height="32"
+                         class="rounded-circle flex-shrink-0">
+                    <div class="d-flex gap-2 w-100 justify-content-between">
+                        <a class="text-reset text-decoration-none"
+                           href="{% url "usuario-detail" usuario.id %}">
+                            <h6 class="mb-0">{{ usuario.user.get_full_name }}</h6>
+                            <p class="mb-0 opacity-75">{{ usuario.rol }}</p>
+                        </a>
+                        <div>
+                            <a class="btn btn-primary btn-sm" href="{% url "usuario-update" usuario.id %}">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a class="btn btn-danger btn-sm" href="{% url "usuario-delete" usuario.id %}">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="card-body text-end">
+            <a class="btn btn-primary" href="{% url "usuario-add" %}" role="button">nuevo</a>
+        </div>
+    </div>
+    {% comment %}
+    <ul>
+        {% for usuario in organizacion.usuarios.all %}
+            <li>{{ usuario.user.get_full_name }}</li>
+        {% endfor %}
+    </ul>
+    <ul>
+        {% for caracteristica in caracteristicas %}
+            <li>{{ caracteristica.nombre }} {{ caracteristica.activa }}</li>
+        {% endfor %}
+    </ul>
+    {% endcomment %}
+{% endblock %}

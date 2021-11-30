@@ -17,7 +17,6 @@ import rest_framework.permissions
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
@@ -28,7 +27,6 @@ SECRET_KEY = 'django-insecure-i@c(3y2iz_obupay2d3^9a5xpp_(sl&dxwfl%=ljis!#&st_aj
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
 
 # Application definition
 
@@ -44,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'django_extensions',
+    "django_bootstrap5",
 ]
 
 MIDDLEWARE = [
@@ -59,6 +58,19 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'inspecciones_back.urls'
 
+
+class InvalidStringShowWarning(str):
+    def __mod__(self, other):
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.warning("In template, undefined variable or unknown value for: '%s'" % (other,))
+        return ""
+
+    def __bool__(self):  # if using Python 2, use __nonzero__ instead
+        # make the template tag `default` use its fallback value
+        return False
+
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -72,12 +84,12 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'string_if_invalid': InvalidStringShowWarning("%s"),
         },
     },
 ]
 
 WSGI_APPLICATION = 'inspecciones_back.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
@@ -88,7 +100,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -108,13 +119,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-co'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Bogota'
 
 USE_I18N = True
 
@@ -122,12 +132,11 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-#STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -152,3 +161,17 @@ MEDIA_ROOT = 'media/'
 MEDIA_URL = 'media/'
 
 CORS_ORIGIN_ALLOW_ALL = True
+
+LOGIN_REDIRECT_URL = 'home'
+
+# Settings for django-bootstrap5
+BOOTSTRAP5 = {
+    "error_css_class": "django_bootstrap5-error",
+    "required_css_class": "django_bootstrap5-required",
+    "javascript_in_head": False,
+    "javascript_url": {
+        "url": "https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js",
+        "integrity": "sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p",
+        "crossorigin": "anonymous",
+    },
+}

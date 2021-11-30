@@ -57,11 +57,6 @@
                         </div>
                     </li>
 
-                    {% if request.user.is_staff %}
-                        <li class="nav-item {% if url_name == 'panel' %}active{% endif %}"><a class="nav-link"
-                                                                                              href="{% url 'panel' %}">Panel</a>
-                        </li>
-                    {% endif %}
                 {% endwith %}
             </ul>
             <form class="form-inline mr-auto" target="_self">

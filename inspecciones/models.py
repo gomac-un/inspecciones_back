@@ -5,6 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
+from django.urls import reverse
 
 from inspecciones.q_logic import different, if_and_only_if
 
@@ -17,6 +18,9 @@ class Organizacion(models.Model):
 
     def __str__(self):
         return self.nombre
+
+    def get_absolute_url(self):
+        return reverse('organizacion-detail', kwargs={'pk': self.pk})
 
 
 class Perfil(models.Model):

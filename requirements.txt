@@ -4,3 +4,4 @@ Pillow
 django-cors-headers
 djangorestframework-recursive
 django-extensions
+django-bootstrap5
