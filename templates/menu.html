@@ -25,9 +25,15 @@
                         </li>
                     -->
                     <li>
-                        <a href="{% url "lista_inspecciones" %}" class="nav-link text-white">
+                        <a href="{% url "inspeccion-list" %}" class="nav-link text-white">
                             <i class="bi d-block mx-auto mb-1 bi-table"></i>
                             Inspecciones
+                        </a>
+                    </li>
+                <li>
+                        <a href="{% url "activo-list" %}" class="nav-link text-white">
+                            <i class="bi d-block mx-auto mb-1 bi-box"></i>
+                            Activos
                         </a>
                     </li>
                     {% if request.user.is_staff %}

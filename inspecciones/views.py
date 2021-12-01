@@ -8,14 +8,7 @@ from django.views.generic import CreateView, UpdateView, DeleteView, ListView, D
 from django.views.generic.base import TemplateResponseMixin, ContextMixin, View
 
 from inspecciones.forms import PerfilForm, UserForm, UserEditForm, PerfilEditForm
-from inspecciones.models import Organizacion, Inspeccion, Perfil
-
-
-@login_required(login_url="login")
-def lista_inspecciones(request):
-    inspecciones = Inspeccion.objects.all().order_by('-momento_subida')
-    context = {'finalizadas': inspecciones}
-    return render(request, 'inspecciones/list_inspecciones.html', context)
+from inspecciones.models import Organizacion, Inspeccion, Perfil, Activo
 
 
 class OrganizacionListView(ListView):
@@ -154,3 +147,18 @@ class RegistrationView(TemplateResponseMixin, ContextMixin, View):
         # Pass context back to render_to_response() including any invalid forms
         return self.render_to_response(context)
 
+
+class InspeccionListView(ListView):
+    def get_queryset(self):
+        return Inspeccion.objects.filter(cuestionario__organizacion=self.request.user.perfil.organizacion) \
+            .order_by('-momento_inicio')
+
+
+class InspeccionDetailView(DetailView):
+    model = Inspeccion
+    pk_url_kwarg = 'inspeccion_id'
+
+
+class ActivoListView(ListView):
+    def get_queryset(self):
+        return Activo.objects.filter(organizacion=self.request.user.perfil.organizacion)

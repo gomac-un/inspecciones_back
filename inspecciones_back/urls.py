@@ -24,26 +24,31 @@ import inspecciones.views
 
 
 def redirect_to_default(*args, **kwargs):
-    return HttpResponseRedirect(reverse('lista_inspecciones'))
+    return HttpResponseRedirect(reverse('inspeccion-list'))
 
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
+                  path('inspecciones/api/v1/', include(inspecciones.urls)),
                   path('', redirect_to_default),
                   path('admin/', admin.site.urls),
                   path('accounts/register/', inspecciones.views.RegistrationView.as_view(), name="registro", ),
                   path('accounts/', include('django.contrib.auth.urls')),
                   path('logout/', logout_then_login, name='logout'),
                   path('home/', redirect_to_default, name='home'),
-                  path('inspecciones/api/v1/', include(inspecciones.urls)),
 
                   path('inspecciones/', include([
-                      path('', inspecciones.views.lista_inspecciones, name='lista_inspecciones'),
-                      path('<int:inspeccion_id>/', redirect_to_default, name='detalle_inspeccion'),
+                      path('', inspecciones.views.InspeccionListView.as_view(), name='inspeccion-list'),
+                      path('<str:inspeccion_id>/', inspecciones.views.InspeccionDetailView.as_view(),
+                           name='inspeccion-detail'),
                       path('estadisticas/', redirect_to_default, name='estadisticas'),
                       path('descargar_inspecciones/', redirect_to_default, name='descargar_inspecciones'),
                       path('formOtPadre/<str:pk>/', redirect_to_default, name='formOtPadre'),
+                  ])),
+
+                  path('activos/', include([
+                      path('', inspecciones.views.ActivoListView.as_view(), name='activo-list'),
                   ])),
 
                   path('organizaciones/', include([

@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
@@ -103,6 +104,16 @@ class Activo(models.Model):
 
     def __str__(self):
         return self.id
+
+    def estado_planeacion_por_cuestionario(self):
+        cuestionarios_que_aplican = Cuestionario.objects.filter(etiquetas_aplicables__in=self.etiquetas.all())
+        res = []
+        for cuestionario in cuestionarios_que_aplican:
+            ultima_inspeccion = self.inspecciones.filter(cuestionario=cuestionario).order_by('-momento_finalizacion').first()
+            dias_desde_inspeccion = datetime.now().astimezone()-ultima_inspeccion.momento_finalizacion
+            retraso = max(0, dias_desde_inspeccion.days - cuestionario.periodicidad_dias)
+            res.append({"cuestionario": cuestionario, "ultima_inspeccion": ultima_inspeccion, "retraso": retraso})
+        return res
 
 
 class Cuestionario(models.Model):
