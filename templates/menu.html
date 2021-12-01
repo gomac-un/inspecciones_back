@@ -4,14 +4,16 @@
         <div class="container">
             <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
                 <a href="/" class="d-flex align-items-center my-2 my-lg-0 me-lg-auto text-white text-decoration-none">
-                    <img src="{% static 'assets/img/logo_limpio_sin_bg.png' %}" style="height: 36px;width: 46px;" alt="logo_gomac">
+                    <img src="{% static 'assets/img/logo_limpio_sin_bg.png' %}" style="height: 36px;width: 46px;"
+                         alt="logo_gomac">
                 </a>
+
 
                 <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
                     <li>
-                        <a href="{% url "home" %}" class="nav-link text-secondary">
+                        <a href="{% url "mi-organizacion" %}" class="nav-link text-white">
                             <i class="bi d-block mx-auto mb-1 bi-house"></i>
-                            Inicio
+                            {{ request.user.perfil.organizacion.nombre }}
                         </a>
                     </li>
                     <li>
@@ -26,12 +28,22 @@
                             Inspecciones
                         </a>
                     </li>
+                    {% if request.user.is_staff %}
+                        <li>
+                            <a href="{% url "organizacion-list" %}" class="nav-link text-white">
+                                <i class="bi d-block mx-auto mb-1 bi-grid"></i>
+                                Organizaciones
+                            </a>
+                        </li>
+                    {% endif %}
+
                     <li>
-                        <a href="{% url "organizacion-list" %}" class="nav-link text-white">
-                            <i class="bi d-block mx-auto mb-1 bi-grid"></i>
-                            Organizaciones
+                        <a href="#" class="nav-link text-white">
+                            <i class="bi d-block mx-auto mb-1 bi-download"></i>
+                            descargar app
                         </a>
                     </li>
+
                     <li>
                         <a href="#" class="nav-link text-white">
                             <i class="bi d-block mx-auto mb-1 bi-person-circle"></i>

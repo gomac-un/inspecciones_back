@@ -42,8 +42,9 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'django_extensions',
-    "django_bootstrap5",
+    'django_bootstrap5',
     'multiselectfield',
+    'django_registration'
 ]
 
 MIDDLEWARE = [

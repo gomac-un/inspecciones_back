@@ -1,23 +1,29 @@
 {% extends "base.html" %}
+{% load gomac_tags %}
 {% load static %}
 {% block title %}{{ organizacion.nombre }}{% endblock %}
 {% block content %}
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-3">
         <div class="d-block mb-4 mb-md-0">
             <h2 class="h4">{{ organizacion.nombre }}</h2>
             <p class="mb-0">{{ organizacion.acerca }}</p></div>
         <div class="btn-toolbar mb-2 mb-md-0">
-            <a href="{% url 'organizacion-update' organizacion.id %}" class="btn btn-sm btn-primary d-inline-flex align-items-center">
-                <i class="bi bi-pencil"></i>
-                Editar
-            </a>
+            {% if request.user.perfil.rol != 'inspector' %}
+                <a href="{% url 'organizacion-update' organizacion.id %}"
+                   class="btn btn-sm btn-primary d-inline-flex align-items-center">
+                    <i class="bi bi-pencil"></i>
+                    Editar
+                </a>
+            {% endif %}
+            {% comment %}
             <div class="btn-group ms-2 ms-lg-3">
                 <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
                 <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
             </div>
+            {% endcomment %}
         </div>
     </div>
-    <div class="row pt-3">
+    <div class="row">
         <div class="col-12 col-xxl-6 mb-4">
             <div class="card border-0 shadow">
                 <h5 class="card-header">Integrantes</h5>
@@ -32,21 +38,55 @@
                                     <h6 class="mb-0">{{ usuario.user.get_full_name }}</h6>
                                     <p class="mb-0 opacity-75">{{ usuario.rol }}</p>
                                 </a>
-                                <div>
-                                    <a class="btn btn-primary btn-sm" href="{% url "usuario-update" usuario.id %}">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <a class="btn btn-danger btn-sm" href="{% url "usuario-delete" usuario.id %}">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
-                                </div>
+                                {% if request.user.perfil.rol != 'inspector' %}
+                                    <div>
+                                        <a class="btn btn-primary btn-sm" href="{% url "usuario-update" usuario.id %}">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a class="btn btn-danger btn-sm" href="{% url "usuario-delete" usuario.id %}">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                {% endif %}
                             </div>
                         </div>
                     {% endfor %}
                 </div>
                 <div class="card-body text-end">
-                    <a class="btn btn-primary" href="{% url "usuario-add" %}" role="button">nuevo</a>
+                    {% if request.user.perfil.rol != 'inspector' %}
+                        <!-- Button trigger modal -->
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#invitarModal">
+                            Invitar
+                        </button>
+                    {% endif %}
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="invitarModal" tabindex="-1" aria-labelledby="invitarModalLabel"
+                         aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="invitarModalLabel">Invitar a un nuevo usuario</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body text-center">
+                                    <span>Comparte el siguiente enlace con la persona para que se registre en tu organización:</span>
+                                    <input type="text" readonly class="form-control"
+                                           value="{% abs_url 'registro' %}?org={{ organizacion.id }}"
+                                           id="link">
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" onclick="copiarLinkRegistro()">
+                                        Copiar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
             </div>
         </div>
         <div class="col-12 col-xxl-6 mb-4">
@@ -79,16 +119,21 @@
             </div>
         </div>
     </div>
-    {% comment %}
-    <ul>
-        {% for usuario in organizacion.usuarios.all %}
-            <li>{{ usuario.user.get_full_name }}</li>
-        {% endfor %}
-    </ul>
-    <ul>
-        {% for caracteristica in caracteristicas %}
-            <li>{{ caracteristica.nombre }} {{ caracteristica.activa }}</li>
-        {% endfor %}
-    </ul>
-    {% endcomment %}
+{% endblock %}
+
+{% block extra_script %}
+    <script>
+        function copiarLinkRegistro() {
+            /* Get the text field */
+            const copyText = document.getElementById("link");
+
+            /* Select the text field */
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); /* For mobile devices */
+
+            /* Copy the text inside the text field */
+            navigator.clipboard.writeText(copyText.value);
+
+        }
+    </script>
 {% endblock %}

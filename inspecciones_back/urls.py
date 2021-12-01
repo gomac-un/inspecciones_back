@@ -32,6 +32,7 @@ def redirect_to_default(*args, **kwargs):
 urlpatterns = [
                   path('', redirect_to_default),
                   path('admin/', admin.site.urls),
+                  path('accounts/register/', inspecciones.views.RegistrationView.as_view(), name="registro", ),
                   path('accounts/', include('django.contrib.auth.urls')),
                   path('logout/', logout_then_login, name='logout'),
                   path('home/', redirect_to_default, name='home'),
@@ -47,13 +48,16 @@ urlpatterns = [
 
                   path('organizaciones/', include([
                       path('', inspecciones.views.OrganizacionListView.as_view(), name='organizacion-list'),
+                      path('mi-organizacion/', inspecciones.views.MiOrganizacionView.as_view(), name='mi-organizacion'),
                       path('<int:pk>/', inspecciones.views.OrganizacionDetailView.as_view(),
                            name='organizacion-detail'),
+
                       path('add/', inspecciones.views.OrganizacionCreateView.as_view(), name='organizacion-add'),
                       path('<int:pk>/update/', inspecciones.views.OrganizacionUpdateView.as_view(),
                            name='organizacion-update'),
                       path('<int:pk>/delete/', inspecciones.views.OrganizacionDeleteView.as_view(),
                            name='organizacion-delete'),
+
                   ])),
 
                   path('usuarios/', include([

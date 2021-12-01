@@ -19,10 +19,12 @@
 
 {% block bootstrap5_content %}
 
-    {% if request.resolver_match.url_name != 'login' %}{% include "menu.html" %}{% endif %}
+    {% if request.resolver_match.url_name != 'login' and request.resolver_match.url_name != 'registro' %}
+        {% include "menu.html" %}
+    {% endif %}
 
     {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
-    <div class="content">
+    <div class="content py-3">
         {% block content %}{% endblock %}
     </div>
 
