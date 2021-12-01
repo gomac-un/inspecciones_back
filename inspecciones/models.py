@@ -30,14 +30,6 @@ class Organizacion(models.Model):
     def get_absolute_url(self):
         return reverse('organizacion-detail', kwargs={'pk': self.pk})
 
-"""
-class Caracteristica(models.Model):
-    nombre = models.CharField(max_length=120, blank=False)
-    descripcion = models.TextField(blank=True)
-
-    def __str__(self):
-        return self.nombre"""
-
 
 class Perfil(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -48,7 +40,6 @@ class Perfil(models.Model):
     class Roles(models.TextChoices):
         inspector = "inspector"
         administrador = "administrador"
-        desarrollador = "desarrollador"
 
     rol = models.CharField(max_length=20, choices=Roles.choices)
 

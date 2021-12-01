@@ -61,9 +61,7 @@ urlpatterns = [
                   ])),
 
                   path('usuarios/', include([
-                      # path('', inspecciones.views.OrganizacionListView.as_view(), name='organizacion-list'),
                       path('<int:pk>/', inspecciones.views.UsuarioDetailView.as_view(), name='usuario-detail'),
-                      path('add/', inspecciones.views.UsuarioCreateView.as_view(), name='usuario-add'),
                       path('<int:pk>/update/', inspecciones.views.UsuarioUpdateView.as_view(), name='usuario-update'),
                       path('<int:pk>/delete/', inspecciones.views.UsuarioDeleteView.as_view(), name='usuario-delete'),
                   ])),
