@@ -71,8 +71,8 @@
                                 <strong>Fotos: </strong><br>
                                 {% for foto in respuesta.fotos_base %}
                                     <div style="display: inline">
-                                        <a href="{{ foto.url }}" target="_blank">
-                                            <img src="{{ foto.url }}" class="img-thumbnail img-responsive"
+                                        <a href="{{ foto.foto.url }}" target="_blank">
+                                            <img src="{{ foto.foto.url }}" class="img-thumbnail img-responsive"
                                                  style="width: 80%"/>
                                         </a>
                                     </div>
@@ -91,8 +91,8 @@
                                     <strong>Fotos: </strong><br>
                                     {% for foto in respuesta.fotos_reparacion %}
                                         <div style="display: inline">
-                                            <a href="{{ foto.url }}" target="_blank">
-                                                <img src="{{ foto.url }}" class="img-thumbnail img-responsive"
+                                            <a href="{{ foto.foto.url }}" target="_blank">
+                                                <img src="{{ foto.foto.url }}" class="img-thumbnail img-responsive"
                                                      style="width: 80%"/>
                                             </a>
                                         </div>

@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, Http404
 from django.shortcuts import render
@@ -11,11 +12,11 @@ from inspecciones.forms import PerfilForm, UserForm, UserEditForm, PerfilEditFor
 from inspecciones.models import Organizacion, Inspeccion, Perfil, Activo
 
 
-class OrganizacionListView(ListView):
+class OrganizacionListView(LoginRequiredMixin, ListView):
     model = Organizacion
 
 
-class OrganizacionDetailView(DetailView):
+class OrganizacionDetailView(LoginRequiredMixin, DetailView):
     model = Organizacion
 
     def get_context_data(self, **kwargs):
@@ -31,26 +32,26 @@ class MiOrganizacionView(OrganizacionDetailView):
         return super().get_object(queryset)
 
 
-class OrganizacionCreateView(CreateView):
+class OrganizacionCreateView(LoginRequiredMixin, CreateView):
     model = Organizacion
     fields = ['nombre', 'logo', 'link', 'acerca', 'caracteristicas']
 
 
-class OrganizacionUpdateView(UpdateView):
+class OrganizacionUpdateView(LoginRequiredMixin, UpdateView):
     model = Organizacion
     fields = ['nombre', 'logo', 'link', 'acerca', 'caracteristicas']
 
 
-class OrganizacionDeleteView(DeleteView):
+class OrganizacionDeleteView(LoginRequiredMixin, DeleteView):
     model = Organizacion
     success_url = reverse_lazy('organizacion-list')
 
 
-class UsuarioDetailView(DetailView):
+class UsuarioDetailView(LoginRequiredMixin, DetailView):
     model = Perfil
 
 
-class UsuarioUpdateView(TemplateResponseMixin, ContextMixin, View):
+class UsuarioUpdateView(LoginRequiredMixin, TemplateResponseMixin, ContextMixin, View):
     """adaptado de https://stackoverflow.com/a/65847099/5076677"""
 
     template_name = "inspecciones/usuario_form.html"
@@ -85,7 +86,7 @@ class UsuarioUpdateView(TemplateResponseMixin, ContextMixin, View):
         return self.render_to_response(context)
 
 
-class UsuarioDeleteView(DeleteView):
+class UsuarioDeleteView(LoginRequiredMixin, DeleteView):
     model = Perfil
     success_url = reverse_lazy('mi-organizacion')
 
@@ -148,17 +149,17 @@ class RegistrationView(TemplateResponseMixin, ContextMixin, View):
         return self.render_to_response(context)
 
 
-class InspeccionListView(ListView):
+class InspeccionListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return Inspeccion.objects.filter(cuestionario__organizacion=self.request.user.perfil.organizacion) \
             .order_by('-momento_inicio')
 
 
-class InspeccionDetailView(DetailView):
+class InspeccionDetailView(LoginRequiredMixin, DetailView):
     model = Inspeccion
     pk_url_kwarg = 'inspeccion_id'
 
 
-class ActivoListView(ListView):
+class ActivoListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return Activo.objects.filter(organizacion=self.request.user.perfil.organizacion)

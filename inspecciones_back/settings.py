@@ -166,6 +166,8 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 LOGIN_REDIRECT_URL = 'home'
 
+LOGIN_URL = 'login'
+
 # Settings for django-bootstrap5
 BOOTSTRAP5 = {
     "error_css_class": "django_bootstrap5-error",
