@@ -73,7 +73,7 @@ class UserViewSet(viewsets.ModelViewSet):
                                          'celular', 'organizacion', 'rol'])
         return serializer_class(*args, **kwargs)
 
-    def create(self, request):
+    def create(self, request, *args, **kwargs):
         serializer = PerfilCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         res = serializer.save()
@@ -111,6 +111,9 @@ class EtiquetaJerarquicaDePreguntaViewSet(viewsets.ModelViewSet):
 
 class ActivoViewSet(PutAsCreateMixin, viewsets.ModelViewSet):
 #class ActivoViewSet(viewsets.ModelViewSet):
+    lookup_field = 'identificador'
+    lookup_url_kwarg = 'pk'
+
     def get_queryset(self):
         # solo muestra los activos que pertenecen a la organizacion del perfil actual
         return Activo.objects.filter(organizacion=self.request.user.perfil.organizacion)
@@ -119,6 +122,7 @@ class ActivoViewSet(PutAsCreateMixin, viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
+        """metodo de creacion modificado para que acepte listas tambien, usado en la carga masiva con excel"""
         many = isinstance(request.data, list)
         serializer = self.get_serializer(data=request.data, many=many)
         serializer.is_valid(raise_exception=True)

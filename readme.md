@@ -5,6 +5,7 @@ Para cargar datos de prueba en una base de datos limpia se usan estos comandos:
 python manage.py migrate
 python manage.py loaddata organizacion_usuarios_y_perfiles
 python manage.py loaddata activo_cuestionario_inspeccion
+python manage.py loaddata organizacion2
 ```
 El usuario gato tiene contraseña gato.
 

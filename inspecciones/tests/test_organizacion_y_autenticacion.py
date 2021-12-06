@@ -133,12 +133,12 @@ class ActivoTest(InspeccionesAuthenticatedTestCase):
         activo_id = 'fas564'
         url = reverse('api:activo-detail', kwargs={'pk': activo_id})
 
-        response = self.client.put(url, {'id': activo_id, 'etiquetas': [{'clave': 'modelo', 'valor': 'carro'}]},
+        response = self.client.put(url, {'identificador': activo_id, 'etiquetas': [{'clave': 'modelo', 'valor': 'carro'}]},
                                    format='json')
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Activo.objects.count(), 2)  # el que crea la clase padre para pruebas, y el nuevo
-        activo = Activo.objects.get(id=activo_id)
+        activo = Activo.objects.get(identificador=activo_id)
         self.assertEqual(activo.organizacion.nombre, 'gomac')
         self.assertEqual(activo.etiquetas.first().clave, 'modelo')
         self.assertEqual(activo.etiquetas.first().valor, 'carro')
@@ -147,23 +147,23 @@ class ActivoTest(InspeccionesAuthenticatedTestCase):
         activo_id = 'fas564'
         url = reverse('api:activo-detail', kwargs={'pk': activo_id})
 
-        response1 = self.client.put(url, {'id': activo_id, 'etiquetas': [{'clave': 'modelo', 'valor': 'carro'},
+        response1 = self.client.put(url, {'identificador': activo_id, 'etiquetas': [{'clave': 'modelo', 'valor': 'carro'},
                                                                          {'clave': 'marca', 'valor': 'ford'}]},
                                     format='json')
 
         self.assertEqual(response1.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Activo.objects.count(), 2)  # el que crea la clase padre para otras pruebas, y el nuevo
-        activo = Activo.objects.get(id=activo_id)
+        activo = Activo.objects.get(identificador=activo_id)
         self.assertEqual(activo.organizacion.nombre, 'gomac')
         self.assertEqual(activo.etiquetas.count(), 2)
         self.assertEqual(activo.etiquetas.first().clave, 'modelo')
         self.assertEqual(activo.etiquetas.first().valor, 'carro')
 
-        response2 = self.client.put(url, {'id': activo_id, 'etiquetas': [{'clave': 'marca', 'valor': 'kenworth'}]},
+        response2 = self.client.put(url, {'identificador': activo_id, 'etiquetas': [{'clave': 'marca', 'valor': 'kenworth'}]},
                                     format='json')
         self.assertEqual(response1.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Activo.objects.count(), 2)
-        activo = Activo.objects.get(id=activo_id)
+        activo = Activo.objects.get(identificador=activo_id)
         self.assertEqual(activo.organizacion.nombre, 'gomac')
         self.assertEqual(activo.etiquetas.count(), 1)
         self.assertEqual(activo.etiquetas.first().clave, 'marca')
@@ -175,12 +175,12 @@ class ActivoTest(InspeccionesAuthenticatedTestCase):
 
         EtiquetaDeActivo.objects.create(clave='modelo', valor='carro')
 
-        response = self.client.put(url, {'id': activo_id, 'etiquetas': [{'clave': 'modelo', 'valor': 'carro'}]},
+        response = self.client.put(url, {'identificador': activo_id, 'etiquetas': [{'clave': 'modelo', 'valor': 'carro'}]},
                                    format='json')
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Activo.objects.count(), 2)  # el que crea la clase padre para pruebas, y el nuevo
-        activo = Activo.objects.get(id=activo_id)
+        activo = Activo.objects.get(identificador=activo_id)
         self.assertEqual(activo.etiquetas.first().clave, 'modelo')
         self.assertEqual(activo.etiquetas.first().valor, 'carro')
         self.assertEqual(EtiquetaDeActivo.objects.count(), 1)
@@ -189,7 +189,7 @@ class ActivoTest(InspeccionesAuthenticatedTestCase):
         activo_id = 'fas564'
         url = reverse('api:activo-detail', kwargs={'pk': activo_id})
 
-        response = self.client.put(url, {'id': activo_id, 'etiquetas': []},
+        response = self.client.put(url, {'identificador': activo_id, 'etiquetas': []},
                                    format='json')
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -198,8 +198,8 @@ class ActivoTest(InspeccionesAuthenticatedTestCase):
         etiqueta1 = EtiquetaDeActivo.objects.create(clave='modelo', valor='carro')
         etiqueta2 = EtiquetaDeActivo.objects.create(clave='year', valor='2022')
         otra_org = Organizacion.objects.create(nombre="otraorg")
-        Activo.objects.create(id="fas564", organizacion=self.perfil.organizacion).etiquetas.set([etiqueta1, etiqueta2])
-        Activo.objects.create(id="fas563", organizacion=otra_org).etiquetas.set([etiqueta1])
+        Activo.objects.create(identificador="fas564", organizacion=self.perfil.organizacion).etiquetas.set([etiqueta1, etiqueta2])
+        Activo.objects.create(identificador="fas563", organizacion=otra_org).etiquetas.set([etiqueta1])
 
         response = self.client.get(reverse('api:activo-list'))
 

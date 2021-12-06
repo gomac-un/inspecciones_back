@@ -14,7 +14,7 @@ from inspecciones.q_logic import different, if_and_only_if
 
 
 class Organizacion(models.Model):
-    nombre = models.CharField(max_length=120, blank=False)
+    nombre = models.CharField(max_length=120, blank=False, unique=True)
     logo = models.ImageField(default='blank.jpg', upload_to='logos_organizaciones')
     link = models.URLField(blank=True)
     acerca = models.TextField(blank=True)
@@ -98,19 +98,28 @@ class EtiquetaDeActivo(Etiqueta):
 
 
 class Activo(models.Model):
-    id = models.CharField(primary_key=True, max_length=120)
+    identificador = models.CharField(max_length=120)
     etiquetas = models.ManyToManyField(EtiquetaDeActivo, related_name='activos')
     organizacion = models.ForeignKey(Organizacion, related_name='activos', on_delete=models.CASCADE)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['id', 'organizacion'], name='%(app_label)s_%(class)s_natural_key')
+        ]
+
     def __str__(self):
-        return self.id
+        return self.identificador
 
     def estado_planeacion_por_cuestionario(self):
         cuestionarios_que_aplican = Cuestionario.objects.filter(etiquetas_aplicables__in=self.etiquetas.all())
         res = []
         for cuestionario in cuestionarios_que_aplican:
             ultima_inspeccion = self.inspecciones.filter(cuestionario=cuestionario).order_by('-momento_finalizacion').first()
-            dias_desde_inspeccion = datetime.now().astimezone()-ultima_inspeccion.momento_finalizacion
+            if ultima_inspeccion:
+                dias_desde_inspeccion = datetime.now().astimezone()-ultima_inspeccion.momento_finalizacion
+            else:
+                # si no se ha inspeccionado nunca
+                dias_desde_inspeccion = datetime.now().astimezone()-cuestionario.momento_subida
             retraso = max(0, dias_desde_inspeccion.days - cuestionario.periodicidad_dias)
             res.append({"cuestionario": cuestionario, "ultima_inspeccion": ultima_inspeccion, "retraso": retraso})
         return res
@@ -118,12 +127,13 @@ class Activo(models.Model):
 
 class Cuestionario(models.Model):
     id = models.UUIDField(primary_key=True)
-    tipo_de_inspeccion = models.CharField(max_length=120)
+    tipo_de_inspeccion = models.CharField(max_length=500)
     version = models.IntegerField()
     periodicidad_dias = models.IntegerField()
     organizacion = models.ForeignKey(Organizacion, related_name='cuestionarios', on_delete=models.CASCADE)
     # si es null es porque el usuario que lo creó ya no existe
     creador = models.ForeignKey(Perfil, related_name='cuestionarios_creados', null=True, on_delete=models.SET_NULL)
+    momento_subida = models.DateTimeField(auto_now_add=True)
     etiquetas_aplicables = models.ManyToManyField(EtiquetaDeActivo, related_name='cuestionarios')
 
     class Meta:
@@ -159,7 +169,7 @@ class FotoCuestionario(models.Model):
 class Titulo(models.Model):
     id = models.UUIDField(primary_key=True)
     bloque = models.OneToOneField(Bloque, on_delete=models.CASCADE, related_name='titulo')
-    titulo = models.CharField(max_length=100)
+    titulo = models.CharField(max_length=500)
     descripcion = models.CharField(max_length=1500, blank=True)
     fotos = GenericRelation(FotoCuestionario, related_query_name='titulo')
 
@@ -173,7 +183,7 @@ class EtiquetaDePregunta(Etiqueta):
 
 class Pregunta(models.Model):
     id = models.UUIDField(primary_key=True)
-    titulo = models.CharField(max_length=100)
+    titulo = models.CharField(max_length=500)
     descripcion = models.CharField(max_length=1500, blank=True)
     criticidad = models.IntegerField()
     fotos_guia = GenericRelation(FotoCuestionario, related_query_name='pregunta')
@@ -226,7 +236,7 @@ class Pregunta(models.Model):
 
 class OpcionDeRespuesta(models.Model):
     id = models.UUIDField(primary_key=True)
-    titulo = models.CharField(max_length=100)
+    titulo = models.CharField(max_length=500)
     descripcion = models.CharField(max_length=1500, blank=True)
     criticidad = models.IntegerField()
     requiere_criticidad_del_inspector = models.BooleanField()

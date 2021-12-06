@@ -106,20 +106,7 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
+AUTH_PASSWORD_VALIDATORS = []
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
@@ -164,7 +151,7 @@ MEDIA_URL = 'media/'
 
 CORS_ORIGIN_ALLOW_ALL = True
 
-LOGIN_REDIRECT_URL = 'home'
+LOGIN_REDIRECT_URL = '/'
 
 LOGIN_URL = 'login'
 
@@ -179,3 +166,11 @@ BOOTSTRAP5 = {
         "crossorigin": "anonymous",
     },
 }
+
+EMAIL_HOST = 'smtp.sendgrid.net'
+EMAIL_HOST_USER = 'apikey' # this is exactly the value 'apikey'
+EMAIL_HOST_PASSWORD = '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' # this is your API key
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+DEFAULT_FROM_EMAIL = 'shepherdator@gmail.com' # this is the sendgrid email

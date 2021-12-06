@@ -9,7 +9,7 @@ from django.views.generic import CreateView, UpdateView, DeleteView, ListView, D
 from django.views.generic.base import TemplateResponseMixin, ContextMixin, View
 
 from inspecciones.forms import PerfilForm, UserForm, UserEditForm, PerfilEditForm
-from inspecciones.models import Organizacion, Inspeccion, Perfil, Activo
+from inspecciones.models import Organizacion, Inspeccion, Perfil, Activo, Respuesta, Pregunta
 
 
 class OrganizacionListView(LoginRequiredMixin, ListView):
@@ -158,6 +158,25 @@ class InspeccionListView(LoginRequiredMixin, ListView):
 class InspeccionDetailView(LoginRequiredMixin, DetailView):
     model = Inspeccion
     pk_url_kwarg = 'inspeccion_id'
+    """
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        inspeccion = context['inspeccion']
+
+        respuestas = []
+        for respuesta in inspeccion.respuestas.all():
+            respuestas.append(respuesta)
+            if respuesta.tipo_de_respuesta == Respuesta.TiposDeRespuesta.cuadricula:
+                subrespuestas = respuesta.subrespuestas_cuadricula
+                if respuesta.pregunta.tipo_de_cuadricula == Pregunta.TiposDeCuadricula.seleccion_unica:
+                    respuestas.extend(subrespuestas)
+                elif respuesta.pregunta.tipo_de_cuadricula == Pregunta.TiposDeCuadricula.seleccion_multiple:
+                    for subrespuesta in subrespuestas:
+                        respuestas.append(subrespuesta)
+                        respuestas.extend(subrespuesta.subrespuestas_multiple)
+
+        context.update({'respuestas': respuestas})
+        return context"""
 
 
 class ActivoListView(LoginRequiredMixin, ListView):

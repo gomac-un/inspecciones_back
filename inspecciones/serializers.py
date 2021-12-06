@@ -141,17 +141,12 @@ class ActivoSerializer(serializers.ModelSerializer):
 
     def update(self, instance: Activo, validated_data):
         etiquetas_data = validated_data.pop('etiquetas')
-
         activo = instance
-
         activo.etiquetas.clear()
-
         for etiqueta in etiquetas_data:
             etiqueta_db, _ = EtiquetaDeActivo.objects.get_or_create(**etiqueta)
             activo.etiquetas.add(etiqueta_db)
-
         activo.save()
-
         return activo
 
 

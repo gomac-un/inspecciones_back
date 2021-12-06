@@ -9,13 +9,13 @@
 {% block content %}
 
     <form class="card card-gomac" method="post" enctype="multipart/form-data">
-        <h5 class="card-header">{{ organizacion.nombre }}</h5>
+        <h5 class="card-header">{% if organizacion %}{{ organizacion.nombre }}{% endif %}</h5>
 
         <div class="card-body">
             {% csrf_token %}
             {% bootstrap_form form layout="floating" %}
             {% bootstrap_button button_type="submit" content="guardar" %}
-            {% bootstrap_button button_type="reset" content="cancelar" %}
+            {% bootstrap_button button_type="link" href="javascript:history.go(-1)" content="cancelar" %}
         </div>
     </form>
 
