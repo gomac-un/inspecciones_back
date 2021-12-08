@@ -169,7 +169,7 @@ BOOTSTRAP5 = {
 
 EMAIL_HOST = 'smtp.sendgrid.net'
 EMAIL_HOST_USER = 'apikey' # this is exactly the value 'apikey'
-EMAIL_HOST_PASSWORD = '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' # this is your API key
+EMAIL_HOST_PASSWORD = '' # this is your API key
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
