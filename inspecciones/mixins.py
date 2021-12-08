@@ -23,6 +23,23 @@ class AbsoluteLinksMixin(object):
 
         return value.name
 
+
+class CreateAsUpdateMixin(object):
+    def create(self, request, *args, **kwargs):
+        self.kwargs[self.lookup_url_kwarg] = request.data.get(self.lookup_url_kwarg)
+        instance = self.get_object_or_none()
+        if instance is None:
+            return super().create(request, *args, **kwargs)
+        else:
+            return super().update(request, *args, **kwargs)
+
+    def get_object_or_none(self):
+        try:
+            return self.get_object()
+        except Http404:
+            return None
+
+
 class PutAsCreateMixin(object):
     """
     The following mixin class may be used in order to support

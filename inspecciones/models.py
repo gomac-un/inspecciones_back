@@ -58,12 +58,10 @@ class EtiquetaJerarquica(models.Model):
 
 class EtiquetaJerarquicaDeActivo(EtiquetaJerarquica):
     organizacion = models.ForeignKey(Organizacion, related_name='etiquetas_de_activo', on_delete=models.CASCADE)
-    pass
 
 
 class EtiquetaJerarquicaDePregunta(EtiquetaJerarquica):
     organizacion = models.ForeignKey(Organizacion, related_name='etiquetas_de_pregunta', on_delete=models.CASCADE)
-    pass
 
 
 class EtiquetaManager(models.Manager):

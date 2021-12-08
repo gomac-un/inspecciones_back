@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.http import Http404
 from django.shortcuts import render
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
@@ -7,7 +8,7 @@ from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
-from inspecciones.mixins import PutAsCreateMixin
+from inspecciones.mixins import PutAsCreateMixin, CreateAsUpdateMixin
 from inspecciones.models import Perfil, Organizacion, Activo, Cuestionario, Inspeccion, EtiquetaJerarquicaDeActivo, \
     EtiquetaJerarquicaDePregunta
 from inspecciones.serializers import PerfilCreateSerializer, \
@@ -92,22 +93,23 @@ class UserViewSet(viewsets.ModelViewSet):
         return self.retrieve(request)
 
 
-class EtiquetaJerarquicaDeActivoViewSet(viewsets.ModelViewSet):
+class EtiquetaJerarquicaDeActivoViewSet(CreateAsUpdateMixin, viewsets.ModelViewSet):
     def get_queryset(self):
-        # solo muestra los activos que pertenecen a la organizacion del perfil actual
         return EtiquetaJerarquicaDeActivo.objects.filter(organizacion=self.request.user.perfil.organizacion)
 
     serializer_class = EtiquetaJerarquicaDeActivoSerializer
     permission_classes = [permissions.IsAuthenticated]
+    lookup_url_kwarg = 'nombre'
 
 
-class EtiquetaJerarquicaDePreguntaViewSet(viewsets.ModelViewSet):
+class EtiquetaJerarquicaDePreguntaViewSet(CreateAsUpdateMixin, viewsets.ModelViewSet):
     def get_queryset(self):
-        # solo muestra los activos que pertenecen a la organizacion del perfil actual
         return EtiquetaJerarquicaDePregunta.objects.filter(organizacion=self.request.user.perfil.organizacion)
 
     serializer_class = EtiquetaJerarquicaDePreguntaSerializer
     permission_classes = [permissions.IsAuthenticated]
+    lookup_url_kwarg = 'nombre'
+
 
 class ActivoViewSet(PutAsCreateMixin, viewsets.ModelViewSet):
 #class ActivoViewSet(viewsets.ModelViewSet):

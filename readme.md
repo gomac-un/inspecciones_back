@@ -1,5 +1,11 @@
 # Inspecciones [![codecov](https://codecov.io/gh/gomac-un/inspecciones_back/branch/main/graph/badge.svg?token=URPWTW7Z57)](https://codecov.io/gh/gomac-un/inspecciones_back)
-
+Ejecutar el proyecto:
+```
+sudo apt install virtualenv
+python -m venv venv
+source venv/bin/activate
+python -m pip install -r requirements.txt
+```
 Para cargar datos de prueba en una base de datos limpia se usan estos comandos:
 ```
 python manage.py migrate
