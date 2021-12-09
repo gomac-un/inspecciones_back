@@ -130,8 +130,19 @@
             copyText.select();
             copyText.setSelectionRange(0, 99999); /* For mobile devices */
 
-            /* Copy the text inside the text field */
+            try{
+                /* Copy the text inside the text field */
             navigator.clipboard.writeText(copyText.value);
+            } catch (err) {
+                try{
+                    var successful = document.execCommand('copy');
+                    var msg = successful ? 'successful' : 'unsuccessful';
+                } catch (err) {
+                    console.log('Oops, no se pudo copiar');
+                }
+            }
+
+
 
         }
     </script>
