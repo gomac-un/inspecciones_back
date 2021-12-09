@@ -104,7 +104,8 @@ class EtiquetaJerarquicaDeActivoSerializer(serializers.ModelSerializer):
         fields = ['nombre', 'json']
 
     def create(self, validated_data):
-        return EtiquetaJerarquicaDeActivo.objects.create(organizacion=self.context['request'].user.perfil.organizacion, **validated_data)
+        return EtiquetaJerarquicaDeActivo.objects.create(organizacion=self.context['request'].user.perfil.organizacion,
+                                                         **validated_data)
 
 
 class EtiquetaJerarquicaDePreguntaSerializer(serializers.ModelSerializer):
@@ -113,7 +114,8 @@ class EtiquetaJerarquicaDePreguntaSerializer(serializers.ModelSerializer):
         fields = ['nombre', 'json']
 
     def create(self, validated_data):
-        return EtiquetaJerarquicaDePregunta.objects.create(organizacion=self.context['request'].user.perfil.organizacion, **validated_data)
+        return EtiquetaJerarquicaDePregunta.objects.create(organizacion=self.context['request'].user.perfil.organizacion,
+                                                           **validated_data)
 
 
 class EtiquetaSerializer(serializers.ModelSerializer):
@@ -141,17 +143,12 @@ class ActivoSerializer(serializers.ModelSerializer):
 
     def update(self, instance: Activo, validated_data):
         etiquetas_data = validated_data.pop('etiquetas')
-
         activo = instance
-
         activo.etiquetas.clear()
-
         for etiqueta in etiquetas_data:
             etiqueta_db, _ = EtiquetaDeActivo.objects.get_or_create(**etiqueta)
             activo.etiquetas.add(etiqueta_db)
-
         activo.save()
-
         return activo
 
 

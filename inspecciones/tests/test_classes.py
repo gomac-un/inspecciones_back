@@ -13,7 +13,7 @@ class InspeccionesAuthenticatedTestCase(APITestCase):
 
     def setUp(self):
         self._crear_admin_y_autenticar()
-        self.activo = Activo.objects.create(id="a1", organizacion=self.organizacion)
+        self.activo = Activo.objects.create(identificador="a1", organizacion=self.organizacion)
         _, foto_cuestionario_id = self.subir_foto_cuestionario()
         self.foto_cuestionario = FotoCuestionario.objects.get(id=foto_cuestionario_id)
         _, foto_inspeccion_id1 = self.subir_foto_inspeccion()

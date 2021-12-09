@@ -64,6 +64,7 @@ class CuestionarioTest(InspeccionesAuthenticatedTestCase):
         response = self.client.get(url_detalle, {'id': url_detalle})
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        momento_subida = response.data.pop('momento_subida')
         self.assertEqual(response.data, {'id': str(id_local), 'etiquetas_aplicables': [], 'creador': 1,
                                          'tipo_de_inspeccion': 'preoperacional', 'version': 1, 'periodicidad_dias': 1})
 
@@ -77,6 +78,7 @@ class CuestionarioTest(InspeccionesAuthenticatedTestCase):
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        momento_subida = response.data[0].pop('momento_subida')
         self.assertEqual(response.data[0], {'id': str(id_local), 'etiquetas_aplicables': [], 'creador': 1,
                                             'tipo_de_inspeccion': 'preoperacional', 'version': 1,
                                             'periodicidad_dias': 1})
