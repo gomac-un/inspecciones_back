@@ -16,7 +16,7 @@ class CuestionarioTest(InspeccionesAuthenticatedTestCase):
         id_local = uuid.uuid4()
         url = reverse('api:cuestionario-list')
         response = self.client.post(url, {'id': id_local, 'tipo_de_inspeccion': 'preventivo', 'version': 1,
-                                          'periodicidad_dias': 1, 'etiquetas_aplicables': []},
+                                          'estado': 'finalizado', 'periodicidad_dias': 1, 'etiquetas_aplicables': []},
                                     format='json')
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -35,28 +35,11 @@ class CuestionarioTest(InspeccionesAuthenticatedTestCase):
         self.assertEqual(response_creacion.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(Cuestionario.objects.count(), 0)
 
-    def test_no_se_permite_cambiar_id_cuestionario(self):
-        url_crear = reverse('api:cuestionario-list')
-        id_local = uuid.uuid4()
-        response_creacion = self.client.post(url_crear,
-                                             {'id': id_local, 'tipo_de_inspeccion': 'preoperacional', 'version': 1,
-                                              'periodicidad_dias': 1, 'etiquetas_aplicables': []},
-                                             format='json')
-        self.assertEqual(response_creacion.status_code, status.HTTP_201_CREATED)
-
-        url_actualizar = reverse('api:cuestionario-detail', kwargs={'pk': id_local})
-        nueva_id = uuid.uuid4()
-        response_actualizacion = self.client.patch(url_actualizar, {'id': nueva_id},
-                                                   format='json')
-
-        self.assertEqual(response_actualizacion.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(Cuestionario.objects.count(), 1)
-        cuestionario = Cuestionario.objects.get()
-        self.assertEqual(cuestionario.id, id_local)
 
     def test_ver_cuestionario(self):
         id_local = uuid.uuid4()
         cuestionario = Cuestionario.objects.create(id=id_local, tipo_de_inspeccion='preoperacional', version=1,
+                                                   estado=Cuestionario.EstadoDeCuestionario.finalizado,
                                                    periodicidad_dias=1, organizacion=self.organizacion,
                                                    creador=self.perfil)
 
@@ -66,11 +49,13 @@ class CuestionarioTest(InspeccionesAuthenticatedTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         momento_subida = response.data.pop('momento_subida')
         self.assertEqual(response.data, {'id': str(id_local), 'etiquetas_aplicables': [], 'creador': 1,
+                                         'estado': 'finalizado',
                                          'tipo_de_inspeccion': 'preoperacional', 'version': 1, 'periodicidad_dias': 1})
 
     def test_lista_cuestionarios(self):
         id_local = uuid.uuid4()
         cuestionario = Cuestionario.objects.create(id=id_local, tipo_de_inspeccion='preoperacional', version=1,
+                                                   estado=Cuestionario.EstadoDeCuestionario.finalizado,
                                                    periodicidad_dias=1, organizacion=self.organizacion,
                                                    creador=self.perfil)
 
@@ -80,5 +65,6 @@ class CuestionarioTest(InspeccionesAuthenticatedTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         momento_subida = response.data[0].pop('momento_subida')
         self.assertEqual(response.data[0], {'id': str(id_local), 'etiquetas_aplicables': [], 'creador': 1,
+                                            'estado': 'finalizado',
                                             'tipo_de_inspeccion': 'preoperacional', 'version': 1,
                                             'periodicidad_dias': 1})

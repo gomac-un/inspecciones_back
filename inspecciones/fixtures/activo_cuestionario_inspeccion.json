@@ -89,6 +89,7 @@
             "periodicidad_dias": 1,
             "organizacion": 1,
             "creador": 1,
+            "estado": "finalizado",
             "momento_subida": "2021-11-25T00:53:04.811Z",
             "etiquetas_aplicables": [
                 1,

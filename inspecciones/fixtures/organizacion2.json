@@ -98,6 +98,7 @@
         "fields": {
             "tipo_de_inspeccion": "cuestionario3",
             "version": 1,
+            "estado": "finalizado",
             "periodicidad_dias": 5,
             "organizacion": 2,
             "creador": 4,

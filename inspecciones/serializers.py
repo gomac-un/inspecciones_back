@@ -170,18 +170,11 @@ class CuestionarioSerializer(serializers.ModelSerializer):
             cuestionario.etiquetas_aplicables.add(etiqueta_db)
         return cuestionario
 
-    def update(self, instance, validated_data):
-        if 'id' in validated_data:
-            raise serializers.ValidationError({
-                'id': ['no se puede modificar']
-            })
-        return super().update(instance, validated_data)
-
 
 class FotoCuestionarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = FotoCuestionario
-        fields = ['foto']
+        fields = ['id', 'foto']
 
 
 class TituloSerializer(serializers.ModelSerializer):
@@ -343,20 +336,12 @@ class InspeccionCompletaSerializer(serializers.ModelSerializer):
         foto.tipo = FotoRespuesta.TiposDeFoto.base
         foto.save()
         respuesta.fotos.add(foto)
-        # FotoRespuesta.objects.create(respuesta=respuesta, foto=foto_base_data['nombre_subida'],
-        #                              tipo=FotoRespuesta.TiposDeFoto.base)
 
     def _asociar_foto_reparacion(self, respuesta, foto):
         foto.tipo = FotoRespuesta.TiposDeFoto.reparacion
         foto.save()
         respuesta.fotos.add(foto)
 
-
-class SubirFotosSerializer2(serializers.Serializer):
-    fotos = FotoCuestionarioSerializer(many=True)
-
-    class Meta:
-        fields = ['fotos']
 
 
 from pathlib import Path
@@ -379,9 +364,9 @@ class SubirFotosSerializer(serializers.Serializer):
         new_names = {foto.name: ModelClass._default_manager.create(foto=foto).id for foto in fotos}
         return new_names
 
-    def generar_filename(self, name: str) -> Path:
-        file_root, file_ext = os.path.splitext(name)
-        return Path(f'{get_random_string(7)}{file_ext}')
+    # def generar_filename(self, name: str) -> Path:
+    #     file_root, file_ext = os.path.splitext(name)
+    #     return Path(f'{get_random_string(7)}{file_ext}')
 
 
 class SubirFotosCuestionarioSerializer(SubirFotosSerializer):

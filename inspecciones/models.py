@@ -109,7 +109,8 @@ class Activo(models.Model):
         return self.identificador
 
     def estado_planeacion_por_cuestionario(self):
-        cuestionarios_que_aplican = Cuestionario.objects.filter(etiquetas_aplicables__in=self.etiquetas.all())
+        cuestionarios_que_aplican = Cuestionario.objects.filter(etiquetas_aplicables__in=self.etiquetas.all(),
+                                                                estado=Cuestionario.EstadoDeCuestionario.finalizado)
         res = []
         for cuestionario in cuestionarios_que_aplican:
             ultima_inspeccion = self.inspecciones.filter(cuestionario=cuestionario).order_by('-momento_finalizacion').first()
@@ -134,10 +135,16 @@ class Cuestionario(models.Model):
     momento_subida = models.DateTimeField(auto_now_add=True)
     etiquetas_aplicables = models.ManyToManyField(EtiquetaDeActivo, related_name='cuestionarios')
 
+    class EstadoDeCuestionario(models.TextChoices):
+        borrador = 'borrador'
+        finalizado = 'finalizado'
+
+    estado = models.CharField(choices=EstadoDeCuestionario.choices, max_length=50, blank=False)
+
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['organizacion', 'tipo_de_inspeccion', 'version'],
-                                    name='version de cuestionario')
+                                    name='version_de_cuestionario')
         ]
 
     def __str__(self):
@@ -162,6 +169,19 @@ class FotoCuestionario(models.Model):
 
     def __str__(self):
         return self.foto.path
+
+
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
+
+
+@receiver(post_delete, sender=FotoCuestionario)
+def post_foto_cuestionario_deleted(sender, instance, using, **kwargs):
+    """Evita el borrado en cascada de las fotos cuando se elimina el cuestionario
+    TODO: hacer tests
+    TODO: programar la ejecucion de una tarea de limpieza de las fotos huerfanas"""
+    instance.object_id = None
+    instance.save()
 
 
 class Titulo(models.Model):

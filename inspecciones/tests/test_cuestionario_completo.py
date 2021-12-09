@@ -29,6 +29,7 @@ class CuestionarioCompletoTest(InspeccionesAuthenticatedTestCase):
     def test_crear_cuestionario_con_bloque(self):
         url = reverse('api:cuestionario-completo-list')
         response = self.client.post(url, {'id': uuid.uuid4(), 'tipo_de_inspeccion': 'preoperacional', 'version': 1,
+                                          'estado': 'finalizado',
                                           'periodicidad_dias': 1, 'etiquetas_aplicables': [],
                                           'bloques': [
                                               {'id': uuid.uuid4(), 'n_orden': 1}
@@ -43,6 +44,7 @@ class CuestionarioCompletoTest(InspeccionesAuthenticatedTestCase):
     def test_crear_cuestionario_con_etiquetas(self):
         url = reverse('api:cuestionario-completo-list')
         response = self.client.post(url, {'id': uuid.uuid4(), 'tipo_de_inspeccion': 'preoperacional', 'version': 1,
+                                          'estado': 'finalizado',
                                           'periodicidad_dias': 1,
                                           'etiquetas_aplicables': [{'clave': 'color', 'valor': 'amarillo'}],
                                           'bloques': []},
@@ -59,7 +61,7 @@ class CuestionarioCompletoTest(InspeccionesAuthenticatedTestCase):
     def test_crear_cuestionario_con_bloque_y_titulo(self):
         url = reverse('api:cuestionario-completo-list')
         response = self.client.post(url, {'id': uuid.uuid4(), 'tipo_de_inspeccion': 'preoperacional', 'version': 1,
-                                          'periodicidad_dias': 1, 'etiquetas_aplicables': [],
+                                          'periodicidad_dias': 1, 'etiquetas_aplicables': [], 'estado': 'finalizado',
                                           'bloques': [
                                               {'id': uuid.uuid4(), 'n_orden': 1,
                                                'titulo': {'id': uuid.uuid4(), 'titulo': 'tit', 'descripcion': 'desc'}

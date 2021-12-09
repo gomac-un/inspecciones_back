@@ -40,7 +40,7 @@ class InspeccionesAuthenticatedTestCase(APITestCase):
         id_cuestionario = uuid.uuid4()
 
         return self.client.post(url, {'id': id_cuestionario, 'tipo_de_inspeccion': 'preoperacional',
-                                      'version': 1,
+                                      'version': 1, 'estado': 'finalizado',
                                       'periodicidad_dias': 1, 'etiquetas_aplicables': [], 'bloques': bloques,
                                       },
                                 format='json'), id_cuestionario

@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import Http404
 from django.shortcuts import render
 from rest_framework import viewsets, permissions, status
@@ -13,7 +14,7 @@ from inspecciones.models import Perfil, Organizacion, Activo, Cuestionario, Insp
     EtiquetaJerarquicaDePregunta
 from inspecciones.serializers import PerfilCreateSerializer, \
     OrganizacionSerializer, ActivoSerializer, CuestionarioSerializer, CuestionarioCompletoSerializer, \
-    InspeccionCompletaSerializer, PerfilSerializer, SubirFotosSerializer, SubirFotosSerializer2, \
+    InspeccionCompletaSerializer, PerfilSerializer, \
     SubirFotosCuestionarioSerializer, SubirFotosInspeccionSerializer, EtiquetaJerarquicaDeActivoSerializer, \
     EtiquetaJerarquicaDePreguntaSerializer
 
@@ -154,6 +155,15 @@ class CuestionarioCompletoViewSet(CuestionarioViewSet):
         serializer.is_valid(raise_exception=True)
         res = serializer.save()
         return Response(res, status=status.HTTP_201_CREATED)
+
+    @transaction.atomic
+    def update(self, request, *args, **kwargs):
+        """
+        Hace un update a la berraca, borrando todo y volviendolo a insertar
+        TODO: hacer tests para este metodo"""
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return self.create(request, *args, **kwargs)
 
 
 class InspeccionCompletaViewSet(viewsets.ModelViewSet):

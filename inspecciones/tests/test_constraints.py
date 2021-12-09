@@ -10,6 +10,7 @@ from inspecciones.tests.test_classes import InspeccionesAuthenticatedTestCase
 class ConstraintsTest(InspeccionesAuthenticatedTestCase):
     def test_pregunta_debe_estar_asociada_solo_a_bloque_o_cuadricula(self):
         cuestionario = Cuestionario.objects.create(id=uuid.uuid4(), tipo_de_inspeccion='preoperacional', version=1,
+                                                   estado=Cuestionario.EstadoDeCuestionario.finalizado,
                                                    periodicidad_dias=1, organizacion=self.organizacion,
                                                    creador=self.perfil)
         bloque1 = Bloque.objects.create(id=uuid.uuid4(), n_orden=1, cuestionario=cuestionario)

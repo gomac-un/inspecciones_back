@@ -19,7 +19,7 @@
                                     </div>
                                     {% for cuestionario in activo.estado_planeacion_por_cuestionario %}
                                         <div class="cuestionario-box ms--2">
-                                            <h4 class="h6 mb-0">{{ cuestionario.cuestionario.tipo_de_inspeccion }}</h4>
+                                            <h4 class="h6 mb-0">{{ cuestionario.cuestionario }}</h4>
                                             <div class="d-flex align-items-center">
                                                 {% if cuestionario.retraso > 1 %}
                                                     <div class="bg-danger dot rounded-circle me-1"></div>
