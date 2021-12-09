@@ -1,5 +1,5 @@
-
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse_lazy, reverse
 from django.utils.datastructures import MultiValueDictKeyError
@@ -7,7 +7,7 @@ from django.views.generic import CreateView, UpdateView, DeleteView, ListView, D
 from django.views.generic.base import TemplateResponseMixin, ContextMixin, View
 
 from inspecciones.forms import PerfilForm, UserForm, UserEditForm, PerfilEditForm
-from inspecciones.models import Organizacion, Inspeccion, Perfil, Activo
+from inspecciones.models import Organizacion, Inspeccion, Perfil, Activo, Respuesta
 
 
 class OrganizacionListView(LoginRequiredMixin, ListView):
@@ -156,6 +156,31 @@ class InspeccionListView(LoginRequiredMixin, ListView):
 class InspeccionDetailView(LoginRequiredMixin, DetailView):
     model = Inspeccion
     pk_url_kwarg = 'inspeccion_id'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        respuestas = context['inspeccion'].respuestas.all().order_by('-criticidad_calculada_con_reparaciones')
+        context.update({'respuestas': respuestas})
+        idsRespuestas = context['inspeccion'].respuestas.values_list('id', flat=True)
+        respuestasCuadricula = Respuesta.objects.filter(respuesta_cuadricula__id__in=idsRespuestas)
+        respuestasCuadriculaIds = respuestasCuadricula.values_list('id', flat=True)
+        respuestasMultiples = Respuesta.objects.filter(
+            Q(respuesta_multiple__id__in=idsRespuestas) | Q(respuesta_multiple__id__in=respuestasCuadriculaIds),
+            opcion_respondida_esta_seleccionada=True)
+        context.update({'respuestasMultiples': respuestasMultiples})
+        context.update({'respuestasCuadricula': respuestasCuadricula})
+        reparadas = respuestas.filter(reparado=True).count() + respuestasCuadricula.filter(
+            reparado=True).count() + respuestasMultiples.filter(reparado=True).count()
+        pendientes = respuestas.filter(
+            criticidad_calculada_con_reparaciones__gt=0).count() + respuestasCuadricula.filter(
+            criticidad_calculada_con_reparaciones__gt=0).count() + respuestasMultiples.filter(
+            criticidad_calculada_con_reparaciones__gt=0).count()
+        sinNovedad = respuestas.filter(
+            criticidad_calculada=0).count() + respuestasCuadricula.filter(
+            criticidad_calculada=0).count() + respuestasMultiples.filter(
+            criticidad_calculada=0).count()
+        context.update({'grupos': {'reparadas': reparadas, 'pendiente': pendientes, 'sinNovedad': sinNovedad}})
+        return context
 
 
 class ActivoListView(LoginRequiredMixin, ListView):
