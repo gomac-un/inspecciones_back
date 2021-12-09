@@ -1,195 +1,164 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load gomac_tags %}
 {% block title %}Inspeccion{% endblock %}
 {% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css"/>
     <link rel="stylesheet" type="text/css"
-          href="https://cdn.datatables.net/v/bs5/jq-3.6.0/jszip-2.5.0/dt-1.11.3/b-2.0.1/b-html5-2.0.1/datatables.min.css"/>
+          href="https://cdn.datatables.net/buttons/1.6.2/css/buttons.bootstrap4.min.css"/>
+    <style>
+
+        .smallRow {
+            width: 30%;
+            background-color: rgba(114, 163, 141, 0.2) !important;
+        }
+
+        .dot {
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .bigRow {
+            width: 70%
+        }
+    </style>
 {% endblock %}
 {% block content %}
-    <div class="container">
+    <div class="container-fluid">
         <div class="text-center mt-2 mb-5">
-            <div class="text title"><h5>Inspeccion</h5></div>
+            <div class="text title"><h5>Inspección {{ inspeccion.cuestionario.tipo_de_inspeccion }}</h5></div>
+        </div>
+        <div class="row row-cols-2">
+            <div class="col-2 col-12 col-sm-4">
+                <details>
+                    <summary><strong>Datos de la inspección</strong></summary>
+                    <table class="table table-bordered  small table-responsive-sm table-condensed shadow ">
+
+                        <tbody>
+                        {% if inspeccion.activo.flota == "RENTING" %}
+                            <tr>
+                                <td class="smallRow"></td>
+                                <td class="bigRow"><a class="alert-link"
+                                                      href="{% url 'export_pdf' inspeccion.id %}">Ver pdf</a>
+                                </td>
+                            </tr>{% endif %}
+                        <tr>
+                            <td class="smallRow">Control</td>
+                            <td class="bigRow">{{ inspeccion.activo }}</td>
+                        </tr>
+
+                        <tr>
+                            <td class="smallRow"> Momento inicio:</td>
+                            <td> {{ inspeccion.momento_inicio|date:"d-M-Y P" }} </td>
+                        </tr>
+                        <tr>
+                            <td class="smallRow"> Momento fin:</td>
+                            {% if inspeccion.momento_finalizacion == None %}
+                                <td> No aplica</td>
+                            {% else %}
+                                <td> {{ inspeccion.momento_finalizacion|date:"d-M-Y P" }}</td>
+                            {% endif %}
+                        </tr>
+                        <tr>
+
+                            <td class="smallRow">Técnico:</td>
+                            <td class="bigRow">{{ inspeccion.inspector.user.get_full_name }}</td>
+                        </tr>
+                        <tr>
+                            <td class="smallRow">Etiquetas cuestionario:</td>
+                            <td class="bigRow">{% for etiqueta in inspeccion.cuestionario.etiquetas_aplicables.all %}
+                                <li>{{ etiqueta.clave }}: {{ etiqueta.valor }}</li>
+                            {% endfor %}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </details>
+            </div>
+            <div class="col-2 col-12 col-sm-4">
+                <div class="btn-group" id="infoNovedades">
+                    <button type="button" class="btn btn-sm dropdown-toggle" data-bs-toggle="dropdown"
+                            aria-expanded="false" style="background-color: rgba(114, 163, 141, 0.2)">
+                        Información novedades
+                    </button>
+                    <div class="dropdown-menu">
+                        <li class="reparacion dropdown-item"
+                            style="cursor: pointer">
+                            <h7>
+                                 <span class="dot"
+                                       style="background-color: rgba(237,181,34,0.8);"></span>
+                                Total reparaciones realizadas: {{ grupos.reparadas }}
+                            </h7>
+                        </li>
+                        <li class="dropdown-item pendiente"
+                            style=" cursor: pointer">
+                            <h7>
+                                <span class="dot"
+                                      style="background-color: #db7205"></span>
+                                Total reparaciones pendientes: {{ grupos.pendiente }}
+                            </h7>
+                        </li>
+
+                        <li class="dropdown-item sinNovedad"
+                            style="cursor: pointer">
+                            <h7>
+                                <!--  <img src="https://img.icons8.com/emoji/24/000000/green-circle-emoji.png"/> -->
+                                <span class="dot"
+                                      style="background-color: #72a38d"></span> Total respuestas sin
+                                novedad: {{ grupos.sinNovedad }}
+                            </h7>
+                        </li>
+                        <li class="dropdown-divider"></li>
+                        <li class="dropdown-item todas"
+                            style="cursor: pointer">
+                            <h7>
+                                <span class="dot"
+                                      style="background-color:  rgba(114, 163, 141, 0.0)"></span>
+                                Ver inspección completa<br>
+                            </h7>
+                        </li>
+                    </div>
+                </div>
+
+            </div>
         </div>
 
-        <div class="row row-content aling-items-center table-responsive">
+        <div class="row row-content  aling-items-center table-responsive">
 
-            <table class="table table-striped table-sm small table-bordered" id="datatable">
+            <table class="table  table-sm small table-bordered" id="datatable">
+
                 <thead>
                 <th scope="col" class="text-center" colspan="3" style="background-color:rgba(114, 163, 141, 0.2) ">
                     Cuestionario
                 </th>
-                <th scope="col" class="text-center" colspan="6" style="background-color: rgba(114, 163, 141, 0.5)">
+                <th scope="col" class="text-center" colspan="6" style="background-color:rgba(114, 163, 141, 0.5)">
                     Inspección
                 </th>
                 <tr>
-                    <th scope="col" class="text-center" style="width: 16%">Pregunta</th>
-                    <th scope="col" class="text-center" style="width: 16%">Etiquetas</th>
-                    <th scope="col" class="text-center" style="width: 12%">Criticidad</th>
-                    <th scope="col" class="text-center" style="width: 16%">Respuesta</th>
+                    <th scope="col" class="text-center" style="width: 15%">Pregunta</th>
+                    <th scope="col" class="text-center" style="width: 10%">Etiquetas</th>
                     <th scope="col" class="text-center" style="width: 2%">Criticidad</th>
-                    <th scope="col" class="text-center" style="width: 14%">Reparación</th>
-                    <th scope="col" class="text-center" style="width: 12%">Criticidad con reparaciones</th>
-                    {% if inspeccion.activo.flota == 'PROPIA' %}
-                        <th scope="col" class="text-center" style="width: 5%">Número OT</th>
-                        <th scope="col" class="text-center" style="width: 5%">Información mantenimiento</th>
-                    {% else %}
-                        <th scope="col" class="text-center" style="width: 7%">Radicado actual</th>
-                        <th scope="col" class="text-center" style="width: 7%">Histórico Radicado</th>
-                    {% endif %}
+                    <th scope="col" class="text-center" style="width: 17%">Respuesta</th>
+                    <th scope="col" class="text-center" style="width: 2%">Criticidad</th>
+                    <th scope="col" class="text-center" style="width: 17%">Reparación</th>
+                    <th scope="col" class="text-center" style="width: 2%">Criticidad con reparaciones</th>
+                    <th scope="col" class="text-center" style="width: 7%">Radicado actual</th>
+                    <th scope="col" class="text-center" style="width: 7%">Histórico Radicado</th>
+
 
                 </tr>
                 </thead>
                 <tbody>
-                {% for respuesta in inspeccion.respuestas.all %}
-                    <tr>
-                        <td><strong>
-                            <div class="text-center">{{ respuesta.pregunta.titulo }}</div>
-                        </strong>
-                            {% if respuesta.pregunta.descripcion %}
-                                Descripción: {{ respuesta.pregunta.descripcion }}
-                            {% endif %}
-                        </td>
-
-                        <td class="text-center" style="width:5%"> {{ respuesta.pregunta.etiquetas }}</td>
-                        <td class="text-center" style="width:5%"> {{ respuesta.pregunta.criticidad }}</td>
-
-                        <td><strong>
-                            <div class="text-center">{{ respuesta.opcion_seleccionada }}</div>
-                        </strong>
-                            <details>
-                                <summary>Ver detalles</summary>
-                                {% if respuesta.opcion_seleccionada.calificable %}
-                                    Criticidad inspector: {{ respuesta.criticidad_del_inspector }}
-                                    <br>
-                                {% endif %}
-                                Criticidad respuesta: {{ respuesta.criticidad_calculada }}
-                                <br>
-                                {% if respuesta.observacion %}
-                                    Observación: {{ respuesta.observacion }}
-                                    <br>
-                                {% endif %}
-                                <strong>Fotos: </strong><br>
-                                {% for foto in respuesta.fotos_base %}
-                                    <div style="display: inline">
-                                        <a href="{{ foto.foto.url }}" target="_blank">
-                                            <img src="{{ foto.foto.url }}" class="img-thumbnail img-responsive"
-                                                 style="width: 80%"/>
-                                        </a>
-                                    </div>
-                                {% endfor %}
-
-                            </details>
-                        </td>
-                        <td class="text-center"> {{ respuesta.opcion_seleccionada.criticidad }}
-                        </td>
-                        <td>
-                            {% if respuesta.reparado %}
-                                Reparado
-                                <details>
-                                    <summary>Ver detalles</summary>
-                                    Observación: {{ respuesta.observacion_reparacion }} <br>
-                                    <strong>Fotos: </strong><br>
-                                    {% for foto in respuesta.fotos_reparacion %}
-                                        <div style="display: inline">
-                                            <a href="{{ foto.foto.url }}" target="_blank">
-                                                <img src="{{ foto.foto.url }}" class="img-thumbnail img-responsive"
-                                                     style="width: 80%"/>
-                                            </a>
-                                        </div>
-                                    {% endfor %}
-                                </details>
-                            {% elif respuesta.conNovedad %}
-                                No reparado
-                            {% else %}
-                                Sin novedad
-                            {% endif %}
-                        </td>
-                        <td style="width:7%;  background-color:
-                                {% if  respuesta.reparado %}
-                                    rgba(237,181,34,0.6)
-                                {% elif respuesta.conNovedad %}
-                                    #db7205
-                                {% else %}
-                                    #72a38d
-                                {% endif %}"
-                            class="text-center">
-                            {{ respuesta.criticidad_calculada_con_reparaciones }}
-                        </td>
-
-                        <td>
-                            {% if respuesta.radicado is  not None %}
-                                <div class="text-center">
-                                    {{ respuesta.radicado }} <br>
-                                    <a role="button" class="btn btn-outline-secondary btn-sm"
-                                       data-toggle="modal"
-                                       data-target="#cambio{{ respuesta.id }}"
-                                       data-placement="bottom">Editar</a>
-
-
-                                </div>
-
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if respuesta.historicoRadicado is not None  and respuesta.historicoRadicado|length > 0 %}
-
-                                {% for radicado in respuesta.historicoRadicado %}
-                                    <li>{{ radicado }}</li>
-                                {% endfor %}
-                            {% endif %}
-
-                        </td>
-
-                    </tr>
-
-                    <div id="cambio{{ respuesta.id }}" class="modal fade" role="dialog">
-                        <form method="post" class="needs-validation" novalidate>
-                            {% csrf_token %}
-                            <div class="modal-dialog modal-lg" role="content">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h4 class="modal-title">Edición radicado</h4>
-                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class=" alert alert-info fade show" role="alert">
-                                            Si desea editar el número de radicado escribalo a continuación. Si no va a
-                                            asignar uno nuevo en el momento, deje el espacio en blanco y presione
-                                            enviar. Podrá asignar uno nuevamente haciendo clic en el botón asignar
-                                            radicado.
-
-                                        </div>
-                                        <div class="form-row">
-                                            <div class="form-group col-sm-5">
-                                                <label>Número radicado</label>
-                                                <input class="form-control" type="number" name="radicado">
-                                            </div>
-                                            <div class=" alert alert-danger alert-dismissible fade show" role="alert">
-                                                Si al enviar el campo esta vacío, deberá asignar un radicado nuevamente
-                                                <button type="button" class="close" data-dismiss="alert"
-                                                        aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <input class="form-control" type="number" name="respuestaId"
-                                               value="{{ respuesta.id }}" style="display: none">
-                                        <div class="form-row">
-                                            <button type="button" class="btn btn-secondary btn-sm ml-auto"
-                                                    data-dismiss="modal">
-                                                Cerrar
-                                            </button>
-                                            <span class="d-inline-block" tabindex="0" data-toggle="tooltip"
-                                                  title="Disabled tooltip">
-                                            </span>
-                                            <button type="submit" class="btn btn-primary btn-sm ml-1">Enviar</button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </form>
-                    </div>
+                {% for respuestaPadre in respuestas %}
+                    {% cycle 'row1' 'row2' as rowClass %}
+                    {% include 'inspecciones/baseDetallePregunta.html' %}
+                    {% if respuestaPadre.pregunta.tipo_de_cuadricula == 'seleccion_multiple' %}
+                        {% get_subRespuestas respuestaPadre as detalleRespuesta %}
+                        {% for resp in detalleRespuesta.subRespuestas %}
+                            {% include 'inspecciones/baseDetallePregunta.html' with respuestaPadre=resp %}
+                        {% endfor %}
+                    {% endif %}
                 {% endfor %}
                 </tbody>
             </table>
