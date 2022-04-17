@@ -1,12 +1,8 @@
-import os
-
-from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.utils.crypto import get_random_string
 from rest_framework import serializers
 from rest_framework_recursive.fields import RecursiveField
 
-from inspecciones.mixins import AbsoluteLinksMixin, DynamicFieldsModelSerializer
+from inspecciones.mixins import DynamicFieldsModelSerializer
 from inspecciones.models import Perfil, Organizacion, Activo, EtiquetaDeActivo, Cuestionario, Bloque, Titulo, \
     Pregunta, EtiquetaDePregunta, OpcionDeRespuesta, CriticidadNumerica, Inspeccion, Respuesta, FotoRespuesta, \
     FotoCuestionario, EtiquetaJerarquicaDeActivo, EtiquetaJerarquicaDePregunta
@@ -114,8 +110,9 @@ class EtiquetaJerarquicaDePreguntaSerializer(serializers.ModelSerializer):
         fields = ['nombre', 'json']
 
     def create(self, validated_data):
-        return EtiquetaJerarquicaDePregunta.objects.create(organizacion=self.context['request'].user.perfil.organizacion,
-                                                           **validated_data)
+        return EtiquetaJerarquicaDePregunta.objects.create(
+            organizacion=self.context['request'].user.perfil.organizacion,
+            **validated_data)
 
 
 class EtiquetaSerializer(serializers.ModelSerializer):
@@ -142,6 +139,7 @@ class ActivoSerializer(serializers.ModelSerializer):
         return activo
 
     def update(self, instance: Activo, validated_data):
+        print('Aqui voy')
         etiquetas_data = validated_data.pop('etiquetas')
         activo = instance
         activo.etiquetas.clear()
@@ -307,13 +305,33 @@ class InspeccionCompletaSerializer(serializers.ModelSerializer):
         model = Inspeccion
         fields = '__all__'
 
+    def update(self, instance, validated_data):
+        perfil = self.context['request'].user.perfil
+        print('aqui 1')
+        respuestas_data = validated_data.pop('respuestas')
+        print('aqui 2')
+        Inspeccion.objects.filter(id=instance.id).update(inspector=perfil, **validated_data)
+        inspeccion = Inspeccion.objects.get(id=instance.id)
+        print('aqui 3')
+        self._borrar_respuestas_inspeccion(inspeccionId=inspeccion.id)
+        for respuesta_data in respuestas_data:
+            self._crear_respuesta(respuesta_data, inspeccion=inspeccion)
+        FotoRespuesta.objects.filter(respuesta=None).delete()
+        return validated_data
+
     def create(self, validated_data):
         respuestas_data = validated_data.pop('respuestas')
         perfil = self.context['request'].user.perfil
         inspeccion = Inspeccion.objects.create(inspector=perfil, **validated_data)
+
         for respuesta_data in respuestas_data:
             self._crear_respuesta(respuesta_data, inspeccion=inspeccion)
         return inspeccion
+
+    def _borrar_respuestas_inspeccion(self, inspeccionId):
+        respuestasPadre = Respuesta.objects.filter(inspeccion__id=inspeccionId)
+        print(respuestasPadre)
+        respuestasPadre.delete()
 
     def _crear_respuesta(self, respuesta_data, inspeccion=None, respuesta_cuadricula=None, respuesta_multiple=None):
         fotos_base_data = respuesta_data.pop('fotos_base')
@@ -323,6 +341,7 @@ class InspeccionCompletaSerializer(serializers.ModelSerializer):
         respuesta = Respuesta.objects.create(inspeccion=inspeccion, respuesta_cuadricula=respuesta_cuadricula,
                                              respuesta_multiple=respuesta_multiple,
                                              **respuesta_data)
+        print('aqui')
         for foto_base_data in fotos_base_data:
             self._asociar_foto_base(respuesta, foto_base_data)
         for foto_reparacion_data in fotos_reparacion_data:
@@ -331,34 +350,32 @@ class InspeccionCompletaSerializer(serializers.ModelSerializer):
             self._crear_respuesta(subrespuesta_data, respuesta_cuadricula=respuesta)
         for subrespuesta_data in subrespuestas_multiple_data:
             self._crear_respuesta(subrespuesta_data, respuesta_multiple=respuesta)
+        return respuesta.id
 
     def _asociar_foto_base(self, respuesta, foto):
         foto.tipo = FotoRespuesta.TiposDeFoto.base
+        foto.respuesta = respuesta
         foto.save()
         respuesta.fotos.add(foto)
 
     def _asociar_foto_reparacion(self, respuesta, foto):
         foto.tipo = FotoRespuesta.TiposDeFoto.reparacion
+        foto.respuesta = respuesta
         foto.save()
         respuesta.fotos.add(foto)
 
 
-
-from pathlib import Path
-from django.core.files.storage import FileSystemStorage
-
-
 class SubirFotosSerializer(serializers.Serializer):
-
     fotos = serializers.ListField(child=serializers.ImageField())
-
+    print(fotos)
     class Meta:
         fields = ['fotos']
 
     def save(self):
         ModelClass = self.Meta.model
         fotos = self.validated_data['fotos']
-        #storage = FileSystemStorage(location=Path(settings.MEDIA_ROOT) / 'fotos_cuestionarios')
+        print(fotos)
+        # storage = FileSystemStorage(location=Path(settings.MEDIA_ROOT) / 'fotos_cuestionarios')
         # name = storage.save(name, content, max_length=self.field.max_length)
         # new_names = {foto.name: storage.save(self.generar_filename(foto.name), foto.file) for foto in fotos}
         new_names = {foto.name: ModelClass._default_manager.create(foto=foto).id for foto in fotos}

@@ -167,6 +167,7 @@ class CuestionarioCompletoViewSet(CuestionarioViewSet):
 
 
 class InspeccionCompletaViewSet(viewsets.ModelViewSet):
+
     def get_queryset(self):
         user = self.request.user
         # solo muestra las inspecciones de la organizacion del perfil actual

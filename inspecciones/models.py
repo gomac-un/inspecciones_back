@@ -96,13 +96,14 @@ class EtiquetaDeActivo(Etiqueta):
 
 
 class Activo(models.Model):
+    id = models.UUIDField(primary_key=True)
     identificador = models.CharField(max_length=120)
     etiquetas = models.ManyToManyField(EtiquetaDeActivo, related_name='activos')
     organizacion = models.ForeignKey(Organizacion, related_name='activos', on_delete=models.CASCADE)
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['id', 'organizacion'], name='%(app_label)s_%(class)s_natural_key')
+            models.UniqueConstraint(fields=['identificador', 'organizacion'], name='%(app_label)s_%(class)s_natural_key')
         ]
 
     def __str__(self):
@@ -114,7 +115,7 @@ class Activo(models.Model):
         res = []
         for cuestionario in cuestionarios_que_aplican:
             ultima_inspeccion = self.inspecciones.filter(cuestionario=cuestionario).order_by('-momento_finalizacion').first()
-            if ultima_inspeccion:
+            if ultima_inspeccion and ultima_inspeccion.momento_finalizacion is not None:
                 dias_desde_inspeccion = datetime.now().astimezone()-ultima_inspeccion.momento_finalizacion
             else:
                 # si no se ha inspeccionado nunca
@@ -284,6 +285,7 @@ class Inspeccion(models.Model):
     momento_inicio = models.DateTimeField()
     momento_finalizacion = models.DateTimeField(null=True)
     momento_subida = models.DateTimeField(auto_now_add=True)
+    avance = models.FloatField(default= 0.0)
 
     class EstadoDeInspeccion(models.TextChoices):
         borrador = 'borrador'
@@ -299,7 +301,7 @@ class Inspeccion(models.Model):
 class FotoRespuesta(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     foto = models.ImageField(upload_to='fotos_inspecciones')
-    respuesta = models.ForeignKey('Respuesta', null=True, on_delete=models.CASCADE, related_name='fotos')
+    respuesta = models.ForeignKey('Respuesta', null=True, on_delete=models.SET_NULL, related_name='fotos')
 
     class TiposDeFoto(models.TextChoices):
         base = 'base'
