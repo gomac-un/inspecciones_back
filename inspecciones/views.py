@@ -179,7 +179,8 @@ class InspeccionDetailView(LoginRequiredMixin, DetailView):
             criticidad_calculada=0).count() + respuestasCuadricula.filter(
             criticidad_calculada=0).count() + respuestasMultiples.filter(
             criticidad_calculada=0).count()
-        context.update({'grupos': {'reparadas': reparadas, 'pendiente': pendientes, 'sinNovedad': sinNovedad}})
+        context.update({'grupos': {'reparadas': reparadas, 'pendiente': pendientes, 'sinNovedad': sinNovedad,
+                                   'todas': reparadas + pendientes + sinNovedad}})
         return context
 
 

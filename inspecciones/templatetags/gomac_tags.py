@@ -21,22 +21,38 @@ def as_abs_url(path, request):
 
 
 @register.simple_tag(takes_context=True)
-def get_subRespuestas(context, respObject, ):
+def get_filtro(context, filtro):
+    if filtro == 'pendientes':
+        respuestas = context['respuestas'].filter(criticidad_calculada_con_reparaciones__gt=0)
+    elif filtro == 'reparadas':
+        respuestas = context['respuestas'].filter(reparado=True)
+    elif filtro == 'sinNovedad':
+        respuestas = context['respuestas'].filter(criticidad_calculada=0)
+
+    return respuestas
+
+
+@register.simple_tag(takes_context=True)
+def get_subRespuestas(context, respObject, filtro ):
     tipoDeRespuesta = respObject.tipo_de_respuesta
+    print(tipoDeRespuesta)
     if tipoDeRespuesta == Respuesta.TiposDeRespuesta.seleccion_multiple:
         subRespuestas = context['respuestasMultiples'].filter(respuesta_multiple__id=respObject.id).order_by(
             '-criticidad_calculada_con_reparaciones')
-        return {'subRespuestas': subRespuestas, 'rowspan': len(subRespuestas) + 2}
+        return {'subRespuestas': subRespuestas}
     elif tipoDeRespuesta in [Respuesta.TiposDeRespuesta.seleccion_unica, Respuesta.TiposDeRespuesta.numerica]:
-        subRespuestas = context['inspeccion'].respuestas.filter(id=respObject.id)
-        return {'subRespuestas': subRespuestas, 'rowspan': 2}
+        if respObject.respuesta_cuadricula is None:
+            print('unica')
+            subRespuestas = context['inspeccion'].respuestas.filter(id=respObject.id)
+        else:
+            print('de cuadricula')
+            subRespuestas = [respObject]
+        return {'subRespuestas': subRespuestas}
     elif tipoDeRespuesta == Respuesta.TiposDeRespuesta.cuadricula:
         subRespuestas = context['respuestasCuadricula'].filter(respuesta_cuadricula__id=respObject.id).order_by(
             '-criticidad_calculada_con_reparaciones')
 
-        return {'subRespuestas': subRespuestas, 'rowspan': 2}
-    else:
-        raise Exception('Tipo de respuesta no reconocida')
+        return {'subRespuestas': subRespuestas}
 
 
 @register.simple_tag()

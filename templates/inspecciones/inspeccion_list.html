@@ -36,7 +36,7 @@
                         <td>
                             <button type="button" class="btn btn-default text-center"
                                     aria-label="Left Align"
-                                    onclick="expandir({{ inspeccion.id }},'{% url 'inspeccion-detail' inspeccion.id %}',
+                                    onclick="expandir('{{ inspeccion.id }}','{% url 'inspeccion-detail' inspeccion.id %}',
                                             '{{ inspeccion.momento_inicio }}', '{{ inspeccion.momento_finalizacion }}',)">
                                 <i class="bi bi-plus-circle"></i>
                             </button>
@@ -65,11 +65,10 @@
     </script>
     <script>
         function expandir(inspeccion_id, inspeccion_url, momentoInicio, momentoSubida) {
-
+            console.log('Estoy aqui')
             const id = '#' + inspeccion_id.toString();
             const tr = document.getElementById(inspeccion_id);
             const row = table.row(tr);
-            console.log(row)
             if (row.child.isShown()) {
                 row.child.hide();
                 $(id).removeClass('shown');
