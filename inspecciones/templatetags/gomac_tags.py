@@ -48,11 +48,6 @@ def get_subRespuestas(context, respObject, filtro ):
             print('de cuadricula')
             subRespuestas = [respObject]
         return {'subRespuestas': subRespuestas}
-    elif tipoDeRespuesta == Respuesta.TiposDeRespuesta.cuadricula:
-        subRespuestas = context['respuestasCuadricula'].filter(respuesta_cuadricula__id=respObject.id).order_by(
-            '-criticidad_calculada_con_reparaciones')
-
-        return {'subRespuestas': subRespuestas}
 
 
 @register.simple_tag()

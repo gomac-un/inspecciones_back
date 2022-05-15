@@ -153,31 +153,32 @@ class InspeccionListView(LoginRequiredMixin, ListView):
             .order_by('-momento_inicio')
 
 
+
 class InspeccionDetailView(LoginRequiredMixin, DetailView):
     model = Inspeccion
     pk_url_kwarg = 'inspeccion_id'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # Son las que tienen inspeccionId no nula, de tipo seleccion multiple, seleccion unica
+        # cuadricula y numerica
         respuestas = context['inspeccion'].respuestas.all().order_by('-criticidad_calculada_con_reparaciones')
-        context.update({'respuestas': respuestas})
         idsRespuestas = context['inspeccion'].respuestas.values_list('id', flat=True)
+        # Son las respuestas padre de cada pregunta de la cuadricula
         respuestasCuadricula = Respuesta.objects.filter(respuesta_cuadricula__id__in=idsRespuestas)
         respuestasCuadriculaIds = respuestasCuadricula.values_list('id', flat=True)
+        # Incluye las subrespuestas de las preguntas cuadricula multiple y de seleccion multiple
         respuestasMultiples = Respuesta.objects.filter(
             Q(respuesta_multiple__id__in=idsRespuestas) | Q(respuesta_multiple__id__in=respuestasCuadriculaIds),
             opcion_respondida_esta_seleccionada=True)
         context.update({'respuestasMultiples': respuestasMultiples})
-        context.update({'respuestasCuadricula': respuestasCuadricula})
-        reparadas = respuestas.filter(reparado=True).count() + respuestasCuadricula.filter(
-            reparado=True).count() + respuestasMultiples.filter(reparado=True).count()
+        # Aqui se excluyen las respuestas generales de las preguntas tipo cuadricula.
+        respuestas = respuestas.exclude(tipo_de_respuesta='cuadricula') | respuestasCuadricula
+        context.update({'respuestas': respuestas})
+        reparadas = respuestas.filter(reparado=True).count()
         pendientes = respuestas.filter(
-            criticidad_calculada_con_reparaciones__gt=0).count() + respuestasCuadricula.filter(
-            criticidad_calculada_con_reparaciones__gt=0).count() + respuestasMultiples.filter(
             criticidad_calculada_con_reparaciones__gt=0).count()
         sinNovedad = respuestas.filter(
-            criticidad_calculada=0).count() + respuestasCuadricula.filter(
-            criticidad_calculada=0).count() + respuestasMultiples.filter(
             criticidad_calculada=0).count()
         context.update({'grupos': {'reparadas': reparadas, 'pendiente': pendientes, 'sinNovedad': sinNovedad,
                                    'todas': reparadas + pendientes + sinNovedad}})
