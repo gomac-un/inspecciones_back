@@ -187,4 +187,6 @@ class InspeccionDetailView(LoginRequiredMixin, DetailView):
 
 class ActivoListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
-        return Activo.objects.filter(organizacion=self.request.user.perfil.organizacion)
+        activos = Activo.objects.filter(organizacion=self.request.user.perfil.organizacion)
+        print(activos)
+        return activos
