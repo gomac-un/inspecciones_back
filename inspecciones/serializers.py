@@ -132,16 +132,17 @@ class ActivoSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         etiquetas_data = validated_data.pop('etiquetas')
-        activo = Activo.objects.create(organizacion=self.context['request'].user.perfil.organizacion, **validated_data)
+        activo = Activo.objects.create(organizacion=self.context['request'].user.perfil.organizacion,
+                                       **validated_data)
         for etiqueta in etiquetas_data:
             etiqueta_db, _ = EtiquetaDeActivo.objects.get_or_create(**etiqueta)
             activo.etiquetas.add(etiqueta_db)
         return activo
 
     def update(self, instance: Activo, validated_data):
-        print('Aqui voy')
         etiquetas_data = validated_data.pop('etiquetas')
         activo = instance
+        activo.identificador = validated_data.pop('identificador')
         activo.etiquetas.clear()
         for etiqueta in etiquetas_data:
             etiqueta_db, _ = EtiquetaDeActivo.objects.get_or_create(**etiqueta)

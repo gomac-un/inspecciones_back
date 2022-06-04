@@ -112,10 +112,8 @@ class EtiquetaJerarquicaDePreguntaViewSet(CreateAsUpdateMixin, viewsets.ModelVie
     lookup_url_kwarg = 'nombre'
 
 
-class ActivoViewSet(PutAsCreateMixin, viewsets.ModelViewSet):
-#class ActivoViewSet(viewsets.ModelViewSet):
-    lookup_field = 'identificador'
-    lookup_url_kwarg = 'pk'
+class ActivoViewSet(viewsets.ModelViewSet):
+
 
     def get_queryset(self):
         # solo muestra los activos que pertenecen a la organizacion del perfil actual
