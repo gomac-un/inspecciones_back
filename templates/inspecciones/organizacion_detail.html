@@ -2,9 +2,10 @@
 {% load gomac_tags %}
 {% block title %}{{ organizacion.nombre }}{% endblock %}
 {% block content %}
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-3">
-        <div class="d-block mb-4 mb-md-0">
-            <h2 class="h4">{{ organizacion.nombre }}</h2>
+    <div class="container container-fluid">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-3">
+            <div class="d-block mb-4 mb-md-0">
+                <h2 class="h4">{{ organizacion.nombre }}</h2>
             <p class="mb-0">{{ organizacion.acerca }}</p></div>
         <div class="btn-toolbar mb-2 mb-md-0">
             {% if request.user.perfil.rol != 'inspector' %}
@@ -21,19 +22,68 @@
             </div>
             {% endcomment %}
         </div>
-    </div>
-    <div class="row">
-        <div class="col-12 col-xxl-6 mb-4">
-            <div class="card border-0 shadow">
-                <h5 class="card-header">Integrantes</h5>
-                <div class="list-group list-group-flush">
-                    {% for usuario in organizacion.usuarios.all %}
-                        <div class="list-group-item list-group-item-action d-flex gap-3 py-3">
-                            <img src="{{ usuario.foto.url }}" alt="foto" width="32" height="32"
-                                 class="rounded-circle flex-shrink-0">
-                            <div class="d-flex gap-2 w-100 justify-content-between">
-                                <a class="text-reset text-decoration-none"
-                                   href="#">
+        </div>
+        <div class="row">
+            <div class="card-group d-flex justify-content-center">
+                <div class="col col-sm-2 me-3">
+                    <div class="card">
+                        <div class="card-body ">
+                            <h6 class="card-title">#Inspecciones realizadas</h6>
+                            <h2 class="card-text text-center">{{ inspecciones.total }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col col-sm-2 me-3">
+                    <div class="card">
+                        <div class="card-body ">
+                            <h6 class="card-title">#Inspecciones sin novedad</h6>
+                            <h2 class="card-text text-center">{{ inspecciones.sinNovedad }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col col-sm-2 me-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title">#Inspecciones atrasadas</h6>
+                            <h2 class="card-text text-center">{{ inspecciones.atrasadas }}</h2>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col col-sm-2">
+                    <div class="card">
+                        <div class="card-body ">
+                            <h6 class="card-title">Promedio criticidad inspecciones</h6>
+                            <h2 class="card-text text-center">{{ inspecciones.promedio.criticidad_calculada__avg|floatformat:"2" }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div id="rowChart" class=" row mt-5 " data-url="{% url 'chart_data' %}">
+            <figure class="highcharts-figure col-4">
+                <div class="card " id="estado"></div>
+            </figure>
+            <figure class="highcharts-figure col-4">
+                <div class="card " id="criticidad"></div>
+            </figure>
+            <figure class="highcharts-figure col-4">
+                <div class="card " id="reparaciones"></div>
+            </figure>
+        </div>
+        <div class="row text-center d-flex justify-content-center">
+            <div class="col-6 col-xxl-6 mb-4">
+                <div class="card border-0 shadow">
+                    <h5 class="card-header">Integrantes</h5>
+                    <div class="list-group list-group-flush">
+                        {% for usuario in organizacion.usuarios.all %}
+                            <div class="list-group-item list-group-item-action d-flex gap-3 py-3">
+                                <img src="{{ usuario.foto.url }}" alt="foto" width="32" height="32"
+                                     class="rounded-circle flex-shrink-0">
+                                <div class="d-flex gap-2 w-100 justify-content-between">
+                                    <a class="text-reset text-decoration-none"
+                                       href="#">
                                     <h6 class="mb-0">{{ usuario.user.get_full_name }}</h6>
                                     <p class="mb-0 opacity-75">{{ usuario.rol }}</p>
                                 </a>
@@ -86,15 +136,15 @@
                     </div>
                 </div>
 
+                </div>
             </div>
-        </div>
-        <div class="col-12 col-xxl-6 mb-4">
-            <div class="card border-0 shadow">
-                <h5 class="card-header">Caracteristicas activas</h5>
+            <div class="col-5 col-xxl-6 mb-4">
+                <div class="card border-0 shadow">
+                    <h5 class="card-header">Caracteristicas activas</h5>
 
-                <div class="card-body">
-                    <ul class="list-group list-group-flush">
-                        {% for caracteristica in caracteristicas %}
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            {% for caracteristica in caracteristicas %}
                             <li class="list-group-item px-0">
                                 <div class="row align-items-center">
                                     <div class="col-auto ms--2">
@@ -113,7 +163,8 @@
                                 </div>
                             </li>
                         {% endfor %}
-                    </ul>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -121,6 +172,20 @@
 {% endblock %}
 
 {% block extra_script %}
+    <script src="https://code.highcharts.com/highcharts.src.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+        $.ajax({
+            url: $("#rowChart").attr("data-url"),
+            dataType: 'json',
+            success: function (data) {
+                console.log(data)
+                Highcharts.chart("estado", data[0]);
+                Highcharts.chart("criticidad", data[1]);
+                Highcharts.chart("reparaciones", data[2]);
+            }
+        });
+    </script>
     <script>
         function copiarLinkRegistro() {
             /* Get the text field */
@@ -130,18 +195,17 @@
             copyText.select();
             copyText.setSelectionRange(0, 99999); /* For mobile devices */
 
-            try{
+            try {
                 /* Copy the text inside the text field */
-            navigator.clipboard.writeText(copyText.value);
+                navigator.clipboard.writeText(copyText.value);
             } catch (err) {
-                try{
+                try {
                     var successful = document.execCommand('copy');
                     var msg = successful ? 'successful' : 'unsuccessful';
                 } catch (err) {
                     console.log('Oops, no se pudo copiar');
                 }
             }
-
 
 
         }

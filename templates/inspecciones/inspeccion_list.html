@@ -6,7 +6,7 @@
           href="https://cdn.datatables.net/v/bs5/jq-3.6.0/jszip-2.5.0/dt-1.11.3/b-2.0.1/b-html5-2.0.1/datatables.min.css"/>
 {% endblock %}
 {% block content %}
-    <div class="container">
+    <div class="container ">
 
         <a class="text-right btn btn-sm btn-success" href="{% url 'descargar_inspecciones' %}"> Reporte </a>
         <div class="text-center mt-2 mb-5">
@@ -48,7 +48,7 @@
                         <td class="text-center">{{ inspeccion.inspector.user.get_full_name }}</td>
                         <td class="text-center">{{ inspeccion.criticidad_calculada }}</td>
                         <td class="text-center">{{ inspeccion.criticidad_calculada_con_reparaciones }}</td>
-                        <td class="text-center"> {{ inspeccion.avance }}%</td>
+                        <td class="text-center"> {{ inspeccion.get_avance }}%</td>
                         <td class="text-center">{{ inspeccion.id }}</td>
 
                     </tr>

@@ -1,13 +1,12 @@
 import uuid
 from datetime import datetime
 
+from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
-from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.urls import reverse
-
 from multiselectfield import MultiSelectField
 
 from inspecciones.q_logic import different, if_and_only_if
@@ -297,6 +296,9 @@ class Inspeccion(models.Model):
     criticidad_calculada = models.IntegerField()
     criticidad_calculada_con_reparaciones = models.IntegerField()
 
+    def get_avance(self):
+        return self.avance * 100
+
 
 class FotoRespuesta(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
@@ -380,3 +382,9 @@ class Respuesta(models.Model):
                                                         Q(opcion_seleccionada__isnull=False)),
                                    name='%(app_label)s_%(class)s_unica_respuesta'),
         ]
+
+    def sub_respuestas(self):
+        sub = Respuesta.objects.filter(Q(respuesta_multiple__id=self.id) | Q(respuesta_cuadricula__id=self.id))
+        if sub.exists():
+            return sub
+        return [self]

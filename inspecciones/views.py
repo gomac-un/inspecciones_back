@@ -1,6 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Q
-from django.http import HttpResponseRedirect, HttpResponseBadRequest
+from django.db.models import Q, Avg, Count
+from django.http import HttpResponseRedirect, HttpResponseBadRequest, JsonResponse
 from django.urls import reverse_lazy, reverse
 from django.utils.datastructures import MultiValueDictKeyError
 from django.views.generic import CreateView, UpdateView, DeleteView, ListView, DetailView
@@ -18,8 +18,16 @@ class OrganizacionDetailView(LoginRequiredMixin, DetailView):
     model = Organizacion
 
     def get_context_data(self, **kwargs):
+        inspecciones = Inspeccion.objects.filter(
+            cuestionario__organizacion=self.request.user.perfil.organizacion)
         """Agrega todas las caracteristicas."""
-        context = {'caracteristicas': Organizacion.Caracteristicas.values}
+        context = {'caracteristicas': Organizacion.Caracteristicas.values,
+                   'inspecciones': {
+                       'total': inspecciones.count(),
+                       'sinNovedad': inspecciones.filter(criticidad_calculada=0).count(),
+                       'atrasadas': 10,
+                       'promedio': inspecciones.aggregate(Avg('criticidad_calculada'))
+                   }}
         context.update(kwargs)
         return super().get_context_data(**context)
 
@@ -190,3 +198,122 @@ class ActivoListView(LoginRequiredMixin, ListView):
         activos = Activo.objects.filter(organizacion=self.request.user.perfil.organizacion)
         print(activos)
         return activos
+
+
+def get_chart_template(graphType, data, title, titleSize='16px'):
+    return {
+        'chart': {'type': graphType,
+                  'borderColor': '#ffffff',
+                  'plotBackgroundColor': None,
+                  'plotBorderWidth': None,
+                  'plotShadow': False,
+                  'height': '300px',
+                  },
+        'title': {'text': title,
+                  'style': {
+                      "fontSize": titleSize
+                  },
+                  },
+        'accessibility': {
+            'point': {
+                'valueSuffix': '%'
+            }
+        },
+        'plotOptions': {
+            'pie': {
+                'allowPointSelect': True,
+                'cursor': 'pointer',
+                'dataLabels': {
+                    'enabled': True,
+                    'format': '<b>{point.name}</b>: {point.percentage:.1f} %'
+                },
+            },
+
+        },
+        'series': [data]
+    }
+
+
+def get_sub_respuesta(resp):
+    sub = resp.sub_respuestas()
+    return sub
+
+
+def chart_data_state(request):
+    dataset = Inspeccion.objects.filter(cuestionario__organizacion=request.user.perfil.organizacion)
+    ids = dataset.values_list('id', flat=True)
+    respuestas = Respuesta.objects.filter(inspeccion__id__in=ids, criticidad_calculada__lte=4)
+    idsRespPadres = respuestas.values_list('id', flat=True)
+    subRespMultiples = Respuesta.objects.filter(respuesta_multiple__id__in=idsRespPadres)
+    unicas = respuestas.filter(tipo_de_respuesta__in=['seleccion_unica', 'numerica'])
+    subRespCuadricula = Respuesta.objects.filter(respuesta_cuadricula__id__in=idsRespPadres,
+                                                 tipo_de_respuesta__in=['seleccion_unica', 'numerica'])
+    subResp = subRespMultiples | unicas | subRespCuadricula
+    respuestasCriticas = subResp.values('criticidad_calculada').annotate(cantidad=Count('criticidad_calculada'))
+    novedades = subResp.filter(criticidad_calculada__gt=0).count()
+    reparadas = subResp.filter(reparado=True).count()
+    dataState = {
+        'name': 'Cantidad',
+        'data': [{
+            "name": 'En reparación',
+            "y": dataset.filter(estado='en_reparacion').count()
+        },
+            {
+                "name": 'Borrador',
+                "y": dataset.filter(estado='borrador').count()
+            },
+            {
+                "name": 'Finalizada',
+                "y": dataset.filter(estado='finalizada').count()
+            }
+        ]
+    }
+
+    dataReparaciones = {
+        'name': 'Cantidad',
+        'data': [{
+            "name": 'Pendientes',
+            "y": novedades - reparadas
+        },
+            {
+                "name": 'Atendidas',
+                "y": reparadas
+            },
+        ]
+    }
+    dataCriticidad = {
+        'name': "Cantidad",
+        'colorByPoint': True,
+        'data': list(map(lambda x: {'name': x['criticidad_calculada'], 'y': x['cantidad']}, respuestasCriticas))
+    }
+    chartState = get_chart_template('pie', dataState, 'Estado de inspecciones')
+    chartReparaciones = get_chart_template('pie', dataReparaciones, 'Novedades pendientes vs novedades atendidas',
+                                           "14px")
+    chartCriticidad = get_chart_template('column', dataCriticidad,
+                                         'Comportamiento de criticidad en las respuestas seleccionadas', '14px')
+    chartCriticidad['xAxis'] = {
+        'title': {
+            'text': 'Criticidad'
+        },
+        'categories': list(map(lambda x: x['criticidad_calculada'], respuestasCriticas))
+    }
+    chartCriticidad['legend'] = {
+        'enabled': False
+    }
+    chartCriticidad['yAxis'] = {
+        'title': {
+            'text': 'Total de respuestas'
+        }
+    }
+    chartReparaciones['subtitle'] = {
+        'text': '<div>Novedades<span class="ms-1 badge rounded-pill bg-danger">' + str(
+            novedades) + '</span></div>' + '</span>' + '<br>' + '<div>Reparadas<span class="badge ms-1 rounded-pill bg-warning text-dark">' + str(
+            reparadas) + '</span></div>' + '</span>',
+        'useHTML': True,
+        'align': 'left',
+        'verticalAlign': 'middle',
+    }
+    chartReparaciones['chart']['marginRight'] = -50
+    chartReparaciones['chart']['marginTop'] = 50
+
+    return JsonResponse([chartState, chartCriticidad, chartReparaciones], safe=False)

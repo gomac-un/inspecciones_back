@@ -63,6 +63,7 @@ urlpatterns = [
                            name='organizacion-update'),
                       path('<int:pk>/delete/', inspecciones.views.OrganizacionDeleteView.as_view(),
                            name='organizacion-delete'),
+                      path('json-example/data/', inspecciones.views.chart_data_state, name='chart_data'),
 
                   ])),
 
